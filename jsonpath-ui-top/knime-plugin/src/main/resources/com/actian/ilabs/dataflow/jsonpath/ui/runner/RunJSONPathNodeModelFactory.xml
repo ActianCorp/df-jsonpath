@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<!--
+    Copyright 2015 Actian Corporation
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<knimeNode icon="./JSON.png" type="Manipulator">
+    <name>JSONPath Runner</name>
+    <shortDescription>Node for generating text using using the JSONPath template engine</shortDescription>
+    <fullDescription>
+        <intro>
+            This node uses the StringTemplate v4 template engine to generate text data.
+
+            <p>
+                <a href="http://www.stringtemplate.org">http://www.stringtemplate.org</a>
+            </p>
+
+            <p>The node supports three different templates for generating the text header, body and footer.</p>
+
+            <dl>
+                <dt>HEADER(__metadata)</dt>
+                <dd>If defined the HEADER template will be called once per partition before records are processed if the
+                    partition has any input records. When the template is rendered it is passed a single parameter which
+                    is a list of tuples, one per field, with the {name, type} of each field from the input schema.
+                </dd>
+
+                <dt>RECORD(__data, __values, __types)</dt>
+                <dd>The RECORD template is called once for each input record. The template is passed three
+                    parameters.
+                </dd>
+
+                <dd>The __data parameter is a list of tuples, one per field, with the {name, type, value}
+                    of each field of the input record.
+                </dd>
+
+                <dd>The __values parameter is a map of field names and their associated values. This provides a way
+                    to lookup values by field name.
+                </dd>
+
+                <dd>The __types parameter is a map of field names and their associated types. This provides a way
+                    to lookup types by field name.
+                </dd>
+
+                <dt>FOOTER(__metadata)</dt>
+                <dd>If defined the FOOTER template will be called once per partition after all of the records have been
+                    if
+                    the partition has any input records. The input parameter is identical to the one used for the
+                    HEADER template.
+                </dd>
+            </dl>
+            <p>In all cases the type information uses the XML Schema primitive type names (e.g. xsd:string for
+                String).
+            </p>
+
+        </intro>
+        <option name="String Templates">Template definitions used by the StringTemplate engine</option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Source records">Source records</inPort>
+        <outPort index="0" name="Generated text">Text generated from the templates and source records. The output
+            records have a single string field called stResult
+        </outPort>
+    </ports>
+
+</knimeNode>

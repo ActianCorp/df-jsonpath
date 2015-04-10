@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="com.actian.ilabs.dataflow.jsonpath.ui.feature">
+      <category name="actiandataflow"/>
+   </feature>
+   <category-def name="actiandataflow" label="JSONPath Component">
+      <description>
+         Actian ILabs JSONPath Component
+      </description>
+   </category-def>
+</site>
