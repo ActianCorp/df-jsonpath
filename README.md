@@ -1,6 +1,6 @@
 # df-jsonpath-runner
 
-The JSONPath Runner is an Actian DataFlow operator for running the [JSONPath](https://github.com/jayway/JsonPath) expressions on JSON data in record flows.
+The JSONPath Runner is an Actian DataFlow operator for running JSONPath expressions on JSON data in record flows.  This implementation uses the [Jayway JsonPath 2.0](https://github.com/jayway/JsonPath) engine.
 
 ## Configuration
 
