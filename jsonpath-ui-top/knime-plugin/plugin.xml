@@ -19,15 +19,15 @@
 <plugin>
     <extension point="org.knime.workbench.repository.categories">
         <category
-                description="JSONPath Runner"
+                description="ActianILabs Components"
                 icon="icons/actian-16x16.png"
-                level-id="com.actian.ilabs.dataflow.jsonpath.ui"
-                name="JSONPath" path="/datarush"/>
+                level-id="ActianILabs"
+                name="Actian ILabs" path="/"/>
     </extension>
 
     <extension point="org.knime.workbench.repository.nodes">
         <node
-                category-path="/datarush/com.actian.ilabs.dataflow.jsonpath.ui"
+                category-path="/ActianILabs"
                 factory-class="com.actian.ilabs.dataflow.jsonpath.ui.runner.RunJSONPathNodeModelFactory"
                 id="com.actian.ilabs.dataflow.jsonpath.ui.runner.RunJSONPathNodeModelFactory"/>
     </extension>

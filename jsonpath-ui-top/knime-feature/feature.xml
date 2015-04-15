@@ -16,11 +16,11 @@
 -->
 <feature
         id="com.actian.ilabs.dataflow.jsonpath.ui.feature"
-        label="JSONPath Component"
+        label="Actian ILabs JSONPath Component"
         version="0.0.1.qualifier"
-        provider-name="Actian">
+        provider-name="Actian Corporation">
 
-    <description>This is the JSONPath Component feature.</description>
+    <description>This is the Actian ILabs JSONPath Component feature.</description>
 
     <copyright>Copyright 2015 Actian Corporation</copyright>
 

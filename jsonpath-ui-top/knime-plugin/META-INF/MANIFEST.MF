@@ -4,7 +4,7 @@ Bundle-Name: Actian ILabs JSONPath Runner plug-in
 Bundle-SymbolicName: com.actian.ilabs.dataflow.jsonpath.ui.plugin;singleton:=true
 Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: com.actian.ilabs.dataflow.jsonpath.ui.Activator
-Bundle-Vendor: Actian
+Bundle-Vendor: Actian Corporation
 Eclipse-RegisterBuddy: com.pervasive.datarush.core.runtime
 Require-Bundle: 
  org.eclipse.osgi,
@@ -19,5 +19,4 @@ Bundle-ClassPath: .,
  target/lib/ant-contrib.jar,
  target/lib/com.actian.ilabs.dataflow.jsonpath.ui.plugin.jar,
  target/lib/jsonpath-op.jar,
- target/lib/ST4.jar,
- target/lib/antlr-runtime.jar
+ target/lib/json-path.jar

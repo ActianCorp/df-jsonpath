@@ -46,7 +46,7 @@ import com.pervasive.datarush.types.ScalarTokenType;
 import com.pervasive.datarush.types.TokenTypeConstant;
 import com.pervasive.datarush.types.TypeUtil;
 import org.apache.commons.lang.StringUtils;
-import org.stringtemplate.v4.*;
+// import org.stringtemplate.v4.*;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
 
@@ -188,6 +188,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	@Override
 	protected void execute(ExecutionContext context) {
+/*
 		try {
 			STGroup group = new STGroupString(getStg());
 
@@ -213,7 +214,9 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 			String fnames = StringUtils.join(fnameList, ", ");
 
 			ST headerTemplate = group.getInstanceOf("/HEADER");
-			if (headerTemplate != null /* && context.getPartitionInfo().getPartitionID() == 0 */) {
+			if (headerTemplate != null */
+/* && context.getPartitionInfo().getPartitionID() == 0 *//*
+) {
 				for (int i = 0; i < fields.length; i++) {
 					String typeString = typeMap.containsKey(fields[i].getType()) ? typeMap.get(fields[i].getType()) : "";
 					headerTemplate.addAggr("__metadata.{ name, type }", fields[i].getName(), typeString);
@@ -275,6 +278,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 		} finally {
 		}
+*/
 	}
 	
 	public static void main(String[] args) {
