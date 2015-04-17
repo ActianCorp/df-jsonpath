@@ -40,7 +40,9 @@ import com.pervasive.datarush.ports.PortMetadata;
 
 	private final RunJSONPathNodeSettings settings = new RunJSONPathNodeSettings();
     
-	private JTextArea stg;
+	private JTextArea jsonPathExpr;
+	private JTextField jsonInputField;
+	private JTextField jsonOutputField;
     
     @Override
     public RunJSONPathNodeSettings getSettings() {
@@ -56,10 +58,21 @@ import com.pervasive.datarush.ports.PortMetadata;
 	public Component getComponent() {
 		JPanel dialog = new JPanel();
 		dialog.setLayout(new BorderLayout());
+
+		JPanel fieldSettings = new JPanel();
+		fieldSettings.setLayout(new GridLayout(2,1));
+
+		jsonInputField = createTextField("Input Field Name");
+		jsonOutputField = createTextField("Output Field Name");
+
+		fieldSettings.add(jsonInputField);
+		fieldSettings.add(jsonOutputField);
+
+		dialog.add(fieldSettings, BorderLayout.NORTH);
 		
-		stg = createTextArea();
-    	JScrollPane scrollPane = new JScrollPane(stg);
-    	scrollPane.setBorder(BorderFactory.createTitledBorder("String Template Group"));
+		jsonPathExpr = createTextArea();
+    	JScrollPane scrollPane = new JScrollPane(jsonPathExpr);
+    	scrollPane.setBorder(BorderFactory.createTitledBorder("JSONPath Expression"));
     	dialog.add(scrollPane, BorderLayout.CENTER);
     	
     	return dialog;
@@ -67,12 +80,16 @@ import com.pervasive.datarush.ports.PortMetadata;
 
 	@Override
 	public void refresh(PortMetadata[] arg0) {
-		stg.setText(settings.stg.getStringValue());
+		jsonInputField.setText(settings.jsonInputField.getStringValue());
+		jsonOutputField.setText(settings.jsonOutputField.getStringValue());
+		jsonPathExpr.setText(settings.jsonPathExpr.getStringValue());
 	}
 
 	@Override
 	public void validateAndApplySettings() throws InvalidSettingsException {
-		settings.stg.setStringValue(stg.getText());
+		settings.jsonInputField.setStringValue(jsonInputField.getText());
+		settings.jsonOutputField.setStringValue(jsonOutputField.getText());
+		settings.jsonPathExpr.setStringValue(jsonPathExpr.getText());
 	}
 	
 	private JPasswordField createPasswordField(String title) {

@@ -16,32 +16,47 @@ package com.actian.ilabs.dataflow.jsonpath.ui.runner;
 		limitations under the License.
 */
 
-import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
-import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import java.util.List;
-import org.knime.core.node.defaultnodesettings.SettingsModel;
 import java.util.Arrays;
-import com.pervasive.datarush.ports.PortMetadata;
+import java.util.List;
+
+import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
+
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.SettingsModel;
+
+import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
+import com.pervasive.datarush.ports.PortMetadata;
 
 /*package*/ 
 final class RunJSONPathNodeSettings extends AbstractDRSettingsModel<RunJSONPath> {
 
-    public final SettingsModelString stg = new SettingsModelString("stg", null);
+	public final SettingsModelString jsonInputField = new SettingsModelString("jsonInputField", null);
+	public final SettingsModelString jsonOutputField = new SettingsModelString("jsonOutputField", null);
+    public final SettingsModelString jsonPathExpr = new SettingsModelString("jsonPathExpr", null);
         
     @Override
     protected List<SettingsModel> getComponentSettings() {
         return Arrays.<SettingsModel>
-        asList(stg);
+        asList(jsonInputField, jsonOutputField, jsonPathExpr);
     }
 
     @Override
     public void configure(PortMetadata[] inputTypes, RunJSONPath operator) throws InvalidSettingsException {
-    	if (this.stg.getStringValue() == null || this.stg.getStringValue().trim().isEmpty()) {
-    		throw new InvalidSettingsException("String template definition must not be empty!");
+		// todo Input should be a valid field name from the source port schema
+		// todo Output should be a valid field name that does not conflict with any of the source fields
+    	if (this.jsonInputField.getStringValue() == null || this.jsonInputField.getStringValue().trim().isEmpty()) {
+    		throw new InvalidSettingsException("No input field selected!");
     	}
-    	
-        operator.setStg(this.stg.getStringValue());
+		if (this.jsonOutputField.getStringValue() == null || this.jsonOutputField.getStringValue().trim().isEmpty()) {
+			throw new InvalidSettingsException("No output field specified!");
+		}
+		if (this.jsonPathExpr.getStringValue() == null || this.jsonPathExpr.getStringValue().trim().isEmpty()) {
+			throw new InvalidSettingsException("JSONPath expression must not be empty!");
+		}
+
+		operator.setJsonInputField(this.jsonInputField.getStringValue());
+		operator.setJsonOutputField(this.jsonOutputField.getStringValue());
+		operator.setJsonPathExpr(this.jsonPathExpr.getStringValue());
     }
 }

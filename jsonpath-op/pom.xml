@@ -24,17 +24,17 @@
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <dependencies>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>ST4</artifactId>
-            <version>4.0.8</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
+         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <version>2.0.0</version>
-        </dependency>        <dependency>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.pervasive.datarush</groupId>
             <artifactId>datarush-library</artifactId>
             <version>${env.DATAFLOW_VER}</version>

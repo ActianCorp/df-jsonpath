@@ -22,7 +22,15 @@ import static com.pervasive.datarush.types.TokenTypeConstant.*;
 import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
 
 import java.sql.*;
-import java.util.*;
+// import java.util.*;
+import java.util.Collection;
+import java.util.List;
+
+
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -46,36 +54,15 @@ import com.pervasive.datarush.types.ScalarTokenType;
 import com.pervasive.datarush.types.TokenTypeConstant;
 import com.pervasive.datarush.types.TypeUtil;
 import org.apache.commons.lang.StringUtils;
-// import org.stringtemplate.v4.*;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
 
-	private static final Map<ScalarTokenType, String> typeMap;
-
-	static {
-		Map<ScalarTokenType, String> map = new HashMap<ScalarTokenType, String>();
-
-		map.put(STRING, "xsd:string");
-		map.put(BINARY, "xsd:string");
-
-		map.put(BOOLEAN, "xsd:boolean");
-
-		map.put(NUMERIC, "xsd:decimal");
-		map.put(DOUBLE, "xsd:double");
-		map.put(FLOAT, "xsd:double");
-		map.put(LONG, "xsd:integer");
-		map.put(INT, "xsd:integer");
-		map.put(TIME, "xsd:time");
-		map.put(DATE, "xsd:date");
-		map.put(TIMESTAMP, "xsd:dateTime");
-
-		typeMap = map;
-	}
-
 	private final RecordPort input = newRecordInput("input");
 	private final RecordPort output = newRecordOutput("output");
-	
-	private String stg;
+
+	private String jsonInputField;
+	private String jsonOutputField;
+	private String jsonPathExpr;
 	
 	public RecordPort getInput() {
 		return input;
@@ -84,13 +71,21 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 	public RecordPort getOutput() {
 		return output;
 	}
+
+	public String getJsonInputField() { return jsonInputField; }
+
+	public String getJsonOutputField() { return jsonOutputField; }
 	
-	public String getStg() {
-		return stg;
+	public String getJsonPathExpr() {
+		return jsonPathExpr;
 	}
 
-	public void setStg(String stg) {
-		this.stg = stg;
+	public void setJsonInputField(String s) { this.jsonInputField = s; }
+
+	public void setJsonOutputField(String s) { this.jsonOutputField = s; }
+
+	public void setJsonPathExpr(String s) {
+		this.jsonPathExpr = s;
 	}
 
 	public RunJSONPath() {
@@ -110,8 +105,8 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		//required: declare output type
 		//  in this case our output type is the input type plus an additional field
 		//  containing the result
-		// RecordTokenType outputType = mergeTypes(getInput().getType(context), record(STRING("stResult")));
-		RecordTokenType outputType = record(STRING("stResult"));
+		RecordTokenType outputType = mergeTypes(getInput().getType(context), record(STRING(getJsonOutputField())));
+		// RecordTokenType outputType = record(STRING("stResult"));
 		getOutput().setType(context, outputType);
 
 		//best practice: define output ordering/distribution
@@ -121,194 +116,82 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		output.setOutputDataOrdering(context, DataOrdering.UNSPECIFIED);
 	}
 
-	private String FormatFieldValue(ScalarInputField field) {
-		ScalarTokenType type = field.getType();
-		String valueString = "";
+	private String formatResult(Object o) {
+		String result = null;
 
-		if (type.equals(TokenTypeConstant.BOOLEAN)) {
-			BooleanInputField boolField = (BooleanInputField) field;
-			valueString = DatatypeConverter.printBoolean(boolField.asBoolean());
-		}
-		else if (type.equals(TokenTypeConstant.BINARY)) {
-			BinaryInputField binField = (BinaryInputField) field;
-			valueString = DatatypeConverter.printHexBinary(binField.asBinary());
-		}
-		else if (type.equals(TokenTypeConstant.CHAR)) {
-			CharInputField charField = (CharInputField) field;
-			valueString = charField.toString();
-		}
-		else if (type.equals(TokenTypeConstant.DATE)) {
-			DateInputField dateField = (DateInputField) field;
-			DateFormatter dateFormatter = new DateFormatter("yyyyMMdd");
-			dateFormatter.setSource(dateField);
-			valueString = dateFormatter.format();
-		}
-		else if (type.equals(TokenTypeConstant.DOUBLE)) {
-			DoubleInputField doubleField = (DoubleInputField) field;
-			valueString = DatatypeConverter.printDouble(doubleField.asDouble());
-		}
-		else if (type.equals(TokenTypeConstant.FLOAT)) {
-			FloatInputField floatField = (FloatInputField) field;
-			valueString = DatatypeConverter.printFloat(floatField.asFloat());
-		}
-		else if (type.equals(TokenTypeConstant.INT)) {
-			IntInputField intField = (IntInputField) field;
-			valueString = DatatypeConverter.printInt(intField.asInt());
-		}
-		else if (type.equals(TokenTypeConstant.LONG)) {
-			LongInputField longField = (LongInputField) field;
-			valueString = DatatypeConverter.printLong(longField.asLong());
-		}
-		else if (type.equals(TokenTypeConstant.NUMERIC)) {
-			NumericInputField numericField = (NumericInputField) field;
-			valueString = DatatypeConverter.printDecimal(numericField.asBigDecimal());
-		}
-		else if (type.equals(TokenTypeConstant.STRING)) {
-			StringInputField stringField = (StringInputField) field;
-			valueString = DatatypeConverter.printString(stringField.asString());
-		}
-		else if (type.equals(TokenTypeConstant.TIME)) {
-			TimeInputField timeField = (TimeInputField) field;
-			TimeFormatter timeFormatter = new TimeFormatter("HHmmss.SSSZ");
-			timeFormatter.setSource(timeField);
-			valueString = timeFormatter.format();
-		}
-		else if (type.equals(TokenTypeConstant.TIMESTAMP)) {
-			TimestampInputField timestampField = (TimestampInputField) field;
-			TimestampFormatter timestampFormatter = new TimestampFormatter("yyyyMMdd'T'HHmmss.SSSZ");
-			timestampFormatter.setSource(timestampField);
-			valueString = timestampFormatter.format();
-		}
-		else {
-			valueString = "";
+		if (o instanceof String) {
+			result = "\"" + o + "\"";
+		} else if (o instanceof Number) {
+			result = o.toString();
+		} else if (o instanceof Boolean) {
+			result = o.toString();
+		} else {
+			result = o != null ? Configuration.defaultConfiguration().jsonProvider().toJson(o) : "null";
 		}
 
-		return valueString;
+        return result;
 	}
 
 	@Override
 	protected void execute(ExecutionContext context) {
-/*
-		try {
-			STGroup group = new STGroupString(getStg());
+		Configuration configuration = Configuration.defaultConfiguration();
 
-			RecordInput recordInput = getInput().getInput(context);
-			RecordOutput recordOutput = getOutput().getOutput(context);
+		// configuration = configuration.addOptions(Option.ALWAYS_RETURN_LIST);
 
-			//best practice: get handle to output fields
-			//  resultField is a handle to the result output field
-			//  outputs is an array of all outputs *except* for stResult; corresponds by index to allInputs
-			StringSettable resultField = (StringSettable) recordOutput.getField("stResult");
-			ScalarSettable[] outputs = TokenUtils.selectFields(recordOutput, getInput().getType(context).getNames());
-			ScalarValued[] allInputs = recordInput.getFields();
+		RecordInput recordInput = getInput().getInput(context);
+		RecordOutput recordOutput = getOutput().getOutput(context);
 
-			ScalarInputField [] fields = recordInput.getFields();
+		StringValued inputField = (StringValued) recordInput.getField(getJsonInputField());
+		StringSettable resultField = (StringSettable) recordOutput.getField(getJsonOutputField());
 
-			ArrayList<String> fnameList = new ArrayList<String>(64);
+		ScalarValued[] allInputs = recordInput.getFields();
+		ScalarSettable[] outputs = TokenUtils.selectFields(recordOutput, recordInput.getType().getNames());
 
-			for (int i = 0; i < fields.length; i++) {
-				String fname = fields[i].getName().replaceAll("[^A-Za-z0-9_]","");
-				fnameList.add(fname);
-			}
+		Object res = null;
+		String result = null;
 
-			String fnames = StringUtils.join(fnameList, ", ");
+		while(recordInput.stepNext()) {
 
-			ST headerTemplate = group.getInstanceOf("/HEADER");
-			if (headerTemplate != null */
-/* && context.getPartitionInfo().getPartitionID() == 0 *//*
-) {
-				for (int i = 0; i < fields.length; i++) {
-					String typeString = typeMap.containsKey(fields[i].getType()) ? typeMap.get(fields[i].getType()) : "";
-					headerTemplate.addAggr("__metadata.{ name, type }", fields[i].getName(), typeString);
+			try {
+				res = JsonPath.using(configuration).parse(inputField.asString()).read(getJsonPathExpr());
+
+				if (res instanceof List) {
+					for (Object o: (List) res) {
+						//copy original fields as is into the current row buffer
+						TokenUtils.transfer(allInputs, outputs);
+
+						resultField.set(formatResult(o));
+						recordOutput.push();
+					}
+
 				}
-			}
+				else {
+					//copy original fields as is into the current row buffer
+					TokenUtils.transfer(allInputs, outputs);
 
-			ST footerTemplate = group.getInstanceOf("/FOOTER");
-			if (footerTemplate != null) {
-				for (int i = 0; i < fields.length; i++) {
-					String typeString = typeMap.containsKey(fields[i].getType()) ? typeMap.get(fields[i].getType()) : "";
-					footerTemplate.addAggr("__metadata.{ name, type }", fields[i].getName(), typeString);
-				}
-			}
-
-            long recordCount = 0;
-
-			while(recordInput.stepNext()) {
-				ST recordTemplate = group.getInstanceOf("/RECORD");
-				if (recordTemplate == null)
-					continue;
-
-                recordCount++;
-
-                // Only output the results of the header template if there are records in this partition
-                if (headerTemplate != null && recordCount == 1) {
-                    String result = headerTemplate.render();
-                    resultField.set(result);
-                    recordOutput.push();
-                }
-
-				ArrayList<String> valueList = new ArrayList<String>(64);
-				ArrayList<String> typeList = new ArrayList<String>(64);
-
-				for (int i = 0; i < fields.length; i++) {
-					String valueString = FormatFieldValue(fields[i]);
-					String typeString = typeMap.containsKey(fields[i].getType()) ? typeMap.get(fields[i].getType()) : "";
-					recordTemplate.addAggr("__data.{ name, type, value }", fields[i].getName(), typeString, valueString);
-					// recordTemplate.addAggr("__values.{ " + fname + " }", valueString);
-					valueList.add(valueString);
-					typeList.add(typeString);
-					// recordTemplate.addAggr("__types.{ " + fname + " }", typeString);
-				}
-
-				recordTemplate.addAggr("__values.{ " + fnames + " }", valueList.toArray());
-				recordTemplate.addAggr("__types.{ " + fnames + " }", typeList.toArray());
-				String result = recordTemplate.render();
-				resultField.set(result);
-				recordOutput.push();
-			}
-
-			if (footerTemplate != null && recordCount > 0) {
-					String result = footerTemplate.render();
-					resultField.set(result);
+					resultField.set(formatResult(res));
 					recordOutput.push();
+				}
+			} catch (Exception e) {
+				// todo write records with parse errors to a reject port
+			} finally {
 			}
 
-			//required: signal end-of-data on output
-			recordOutput.pushEndOfData();
-
-		} finally {
 		}
-*/
+
+		recordOutput.pushEndOfData();
 	}
 	
 	public static void main(String[] args) {
 		LogicalGraph graph = LogicalGraphFactory.newLogicalGraph();
-
-        // Use weather alert data from NOAA as the source
+// todo need a better test source
+		// Use weather alert data from NOAA as the source
 		ReadDelimitedText reader = graph.add(new ReadDelimitedText("http://www.ncdc.noaa.gov/swdiws/csv/warn/id=533623"));
 		reader.setHeader(true);
 		RunJSONPath runner = graph.add(new RunJSONPath());
 		WriteDelimitedText writer = graph.add(new WriteDelimitedText());
 
-        String templateGroup = ""
-                + "HEADER(__metadata) ::=<<\n"
-                + "<! Generate a comma separated list of input field names !>\n"
-                + "<trunc(__metadata):{it|<it.name>,}>\n"
-                + "<last(__metadata).name>\n"
-                + ">>\n"
-                + "\n"
-                + "FOOTER(__metadata) ::=<<\n"
-                + "<! Generate a line of text as the footer !>\n"
-                + "\"This is a footer record\"\n"
-                + ">>\n"
-                + "\n"
-                + "RECORD(__data, __types, __values) ::= <<\n"
-                + "\n"
-                + "<! Generate a record with the value of input field 'field0' !>\n"
-                + "<__values.field0>\n"
-                + ">>\n";
-
-		runner.setStg("RECORD(__data, __values, __types) ::= \"<__values><\\n>\"");
+		runner.setJsonPathExpr("RECORD(__data, __values, __types) ::= \"<__values><\\n>\"");
 		writer.setFieldEndDelimiter("]]");
 		writer.setFieldStartDelimiter("[[");
 		writer.setFieldDelimiter("|");

@@ -19,4 +19,6 @@ Bundle-ClassPath: .,
  target/lib/ant-contrib.jar,
  target/lib/com.actian.ilabs.dataflow.jsonpath.ui.plugin.jar,
  target/lib/jsonpath-op.jar,
- target/lib/json-path.jar
+ target/lib/json-path.jar,
+ target/lib/json-smart.jar,
+ target/lib/asm.jar
