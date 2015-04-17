@@ -20,28 +20,17 @@ package com.actian.ilabs.dataflow.jsonpath.runner;
 import static com.pervasive.datarush.io.WriteMode.OVERWRITE;
 import static com.pervasive.datarush.types.TokenTypeConstant.*;
 import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
-
-import java.sql.*;
-// import java.util.*;
-import java.util.Collection;
+ß
 import java.util.List;
 
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 
-import javax.xml.bind.DatatypeConverter;
-
-import com.pervasive.datarush.encoding.text.DateFormatter;
-import com.pervasive.datarush.encoding.text.TimeFormatter;
-import com.pervasive.datarush.encoding.text.TimestampFormatter;
 import com.pervasive.datarush.graphs.LogicalGraph;
 import com.pervasive.datarush.graphs.LogicalGraphFactory;
-import com.pervasive.datarush.io.WriteMode;
+
 import com.pervasive.datarush.operators.*;
-import com.pervasive.datarush.operators.io.textfile.FieldDelimiterSettings;
 import com.pervasive.datarush.operators.io.textfile.ReadDelimitedText;
 import com.pervasive.datarush.operators.io.textfile.WriteDelimitedText;
 import com.pervasive.datarush.ports.physical.*;
@@ -49,11 +38,6 @@ import com.pervasive.datarush.ports.record.*;
 import com.pervasive.datarush.tokens.TokenUtils;
 import com.pervasive.datarush.tokens.scalar.*;
 import com.pervasive.datarush.types.RecordTokenType;
-import com.pervasive.datarush.types.ScalarTokenType;
-
-import com.pervasive.datarush.types.TokenTypeConstant;
-import com.pervasive.datarush.types.TypeUtil;
-import org.apache.commons.lang.StringUtils;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
 
