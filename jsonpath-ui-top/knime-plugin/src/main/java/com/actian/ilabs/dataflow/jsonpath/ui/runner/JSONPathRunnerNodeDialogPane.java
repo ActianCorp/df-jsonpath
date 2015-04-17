@@ -34,18 +34,18 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 import com.pervasive.datarush.knime.coreui.common.CustomDialogComponent;
 import com.pervasive.datarush.ports.PortMetadata;
 
-/*package*/ final class RunJSONPathNodeDialogPane extends JPanel implements CustomDialogComponent<RunJSONPath> {
+/*package*/ final class JSONPathRunnerNodeDialogPane extends JPanel implements CustomDialogComponent<RunJSONPath> {
 
 	private static final long serialVersionUID = -1744417654171054890L;
 
-	private final RunJSONPathNodeSettings settings = new RunJSONPathNodeSettings();
+	private final JSONPathRunnerNodeSettings settings = new JSONPathRunnerNodeSettings();
     
 	private JTextArea jsonPathExpr;
 	private JTextField jsonInputField;
 	private JTextField jsonOutputField;
     
     @Override
-    public RunJSONPathNodeSettings getSettings() {
+    public JSONPathRunnerNodeSettings getSettings() {
         return settings;
     }
     

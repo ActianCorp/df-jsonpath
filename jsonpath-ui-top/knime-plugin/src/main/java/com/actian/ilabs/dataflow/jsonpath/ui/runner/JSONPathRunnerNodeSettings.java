@@ -29,7 +29,7 @@ import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
 import com.pervasive.datarush.ports.PortMetadata;
 
 /*package*/ 
-final class RunJSONPathNodeSettings extends AbstractDRSettingsModel<RunJSONPath> {
+final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPath> {
 
 	public final SettingsModelString jsonInputField = new SettingsModelString("jsonInputField", null);
 	public final SettingsModelString jsonOutputField = new SettingsModelString("jsonOutputField", null);

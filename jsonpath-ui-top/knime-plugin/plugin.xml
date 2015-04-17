@@ -28,7 +28,7 @@
     <extension point="org.knime.workbench.repository.nodes">
         <node
                 category-path="/ActianILabs"
-                factory-class="com.actian.ilabs.dataflow.jsonpath.ui.runner.RunJSONPathNodeModelFactory"
-                id="com.actian.ilabs.dataflow.jsonpath.ui.runner.RunJSONPathNodeModelFactory"/>
+                factory-class="com.actian.ilabs.dataflow.jsonpath.ui.runner.JSONPathRunnerNodeModelFactory"
+                id="com.actian.ilabs.dataflow.jsonpath.ui.runner.JSONPathRunnerNodeModelFactory"/>
     </extension>
 </plugin>

@@ -21,18 +21,18 @@ import com.pervasive.datarush.knime.core.framework.AbstractDRNodeFactory;
 import com.pervasive.datarush.knime.core.framework.DRNodeModel;
 import com.pervasive.datarush.knime.coreui.common.CustomDRNodeDialogPane;
 
-public final class RunJSONPathNodeModelFactory extends AbstractDRNodeFactory<RunJSONPath> {
+public final class JSONPathRunnerNodeModelFactory extends AbstractDRNodeFactory<RunJSONPath> {
 
     @Override
     protected CustomDRNodeDialogPane<RunJSONPath> createNodeDialogPane() {
-    	CustomDRNodeDialogPane<RunJSONPath> dialog = new CustomDRNodeDialogPane<RunJSONPath>(new RunJSONPath(), new RunJSONPathNodeDialogPane());
+    	CustomDRNodeDialogPane<RunJSONPath> dialog = new CustomDRNodeDialogPane<RunJSONPath>(new RunJSONPath(), new JSONPathRunnerNodeDialogPane());
     	dialog.setDefaultTabTitle("Properties");
         return dialog;
     }
 
     @Override
     public DRNodeModel<RunJSONPath> createDRNodeModel() {
-        return new DRNodeModel<RunJSONPath>( new RunJSONPath(), new RunJSONPathNodeSettings());
+        return new DRNodeModel<RunJSONPath>( new RunJSONPath(), new JSONPathRunnerNodeSettings());
     }
 
     @Override
