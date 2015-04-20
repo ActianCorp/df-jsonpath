@@ -36,7 +36,7 @@ import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel;
 import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
 import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
 import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.EditCondition;
-import com.pervasive.datarush.knime.coreui.common.ColumnValueDomain;
+import com.pervasive.datarush.knime.coreui.common.SourceFieldDomain;
 import com.pervasive.datarush.knime.coreui.common.CustomDialogComponent;
 import com.pervasive.datarush.knime.coreui.common.TableEditorPanel;
 import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
@@ -63,9 +63,13 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 	private static final int EXPR_COLUMN = 2;
 
 	private final JSONPathRunnerNodeSettings settings = new JSONPathRunnerNodeSettings();
-    
+
+	private RecordTokenType srcType= TokenTypeConstant.RECORD;
+
+	private SourceFieldDomain srcDomain;
 	private ColumnModel<String> srcColumn;
 	private ColumnModel<String> trgColumn;
+	// private ColumnModel<boolean> explodeColumn;
 	private ColumnModel<String> exprColumn;
 	private ColumnMajorTableModel tblModel;
 
@@ -82,9 +86,12 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 	public JSONPathRunnerNodeDialogPane() {
 		initComponents();
 
+		srcDomain= new SourceFieldDomain(TokenTypeConstant.STRING);
+
 		tblModel= new ColumnMajorTableModel();
-		srcColumn= tblModel.defineColumn("Source Field", new TextValue());
+		srcColumn= tblModel.defineColumn("Source Field", srcDomain);
 		trgColumn= tblModel.defineColumn("Output Field", new TextValue());
+		// explodeColumn = tblModel.defineColumn("Explode Lists", new)
 		exprColumn= tblModel.defineColumn("Expression", new TextValue());
 
 		tblExpressionMapping.setModel(tblModel);
@@ -117,6 +124,9 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 	@Override
 	public void refresh(PortMetadata[] specs) {
+		srcType= ((RecordMetadata) specs[0]).getType();
+		srcDomain.setSourceType(srcType);
+
 		srcColumn.setValues(settings.sourceFields.getStringArrayValue());
 		trgColumn.setValues(settings.targetFields.getStringArrayValue());
 		exprColumn.setValues(settings.expressions.getStringArrayValue());
