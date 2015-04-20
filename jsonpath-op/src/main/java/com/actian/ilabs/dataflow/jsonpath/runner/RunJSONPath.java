@@ -20,7 +20,7 @@ package com.actian.ilabs.dataflow.jsonpath.runner;
 import static com.pervasive.datarush.io.WriteMode.OVERWRITE;
 import static com.pervasive.datarush.types.TokenTypeConstant.*;
 import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
-ß
+
 import java.util.List;
 
 

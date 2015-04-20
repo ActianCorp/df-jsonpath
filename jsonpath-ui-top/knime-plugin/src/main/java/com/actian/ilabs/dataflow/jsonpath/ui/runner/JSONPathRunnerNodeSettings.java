@@ -24,6 +24,8 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
 import com.pervasive.datarush.ports.PortMetadata;
@@ -31,32 +33,37 @@ import com.pervasive.datarush.ports.PortMetadata;
 /*package*/ 
 final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPath> {
 
-	public final SettingsModelString jsonInputField = new SettingsModelString("jsonInputField", null);
-	public final SettingsModelString jsonOutputField = new SettingsModelString("jsonOutputField", null);
-    public final SettingsModelString jsonPathExpr = new SettingsModelString("jsonPathExpr", null);
-        
+	public final SettingsModelStringArray sourceFields = new SettingsModelStringArray("sourceFields", null);
+	public final SettingsModelStringArray targetFields = new SettingsModelStringArray("targetFields", null);
+	public final SettingsModelStringArray expressions = new SettingsModelStringArray("expressions", null);
+	public final SettingsModelBoolean dropUnderived = new SettingsModelBoolean("dropUnderived",false);
+
     @Override
     protected List<SettingsModel> getComponentSettings() {
         return Arrays.<SettingsModel>
-        asList(jsonInputField, jsonOutputField, jsonPathExpr);
+        asList(sourceFields, targetFields, expressions, dropUnderived);
     }
 
     @Override
     public void configure(PortMetadata[] inputTypes, RunJSONPath operator) throws InvalidSettingsException {
 		// todo Input should be a valid field name from the source port schema
 		// todo Output should be a valid field name that does not conflict with any of the source fields
-    	if (this.jsonInputField.getStringValue() == null || this.jsonInputField.getStringValue().trim().isEmpty()) {
-    		throw new InvalidSettingsException("No input field selected!");
-    	}
-		if (this.jsonOutputField.getStringValue() == null || this.jsonOutputField.getStringValue().trim().isEmpty()) {
-			throw new InvalidSettingsException("No output field specified!");
-		}
-		if (this.jsonPathExpr.getStringValue() == null || this.jsonPathExpr.getStringValue().trim().isEmpty()) {
-			throw new InvalidSettingsException("JSONPath expression must not be empty!");
+
+		String[] srcfields = sourceFields.getStringArrayValue();
+		String[] trgfields = targetFields.getStringArrayValue();
+		String[] exprs = expressions.getStringArrayValue();
+
+		if (srcfields == null || trgfields == null || exprs == null) {
+			throw new InvalidSettingsException("JSON path expressions not fully specified.");
 		}
 
-		operator.setJsonInputField(this.jsonInputField.getStringValue());
-		operator.setJsonOutputField(this.jsonOutputField.getStringValue());
-		operator.setJsonPathExpr(this.jsonPathExpr.getStringValue());
-    }
+		if (srcfields.length != exprs.length || trgfields.length != exprs.length) {
+			throw new InvalidSettingsException("JSON path expressions not fully specified.");
+		}
+
+		//operator.setJsonInputField(this.jsonInputField.getStringValue());
+		//operator.setJsonOutputField(this.jsonOutputField.getStringValue());
+		//operator.setJsonPathExpr(this.jsonPathExpr.getStringValue());
+		// operator.setDropUnderivedFields(dropUnderived.getBooleanValue());
+	}
 }
