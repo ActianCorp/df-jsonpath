@@ -8,3 +8,12 @@
 ## File-based project format:
 *.ipr
 *.iws
+
+.idea/libraries/Maven__com_jayway_jsonpath_json_path_2_0_0.xml
+.idea/libraries/Maven__net_minidev_asm_1_0_2.xml
+.idea/libraries/Maven__com_pervasive_datarush_datarush_library_6_5_0_117.xml
+.idea/libraries/Maven__net_minidev_json_smart_2_1_1.xml
+.idea/libraries/Maven__asm_asm_3_3_1.xml
+.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_10.xml
+.idea/libraries/Maven__com_pervasive_datarush_datarush_commons_6_5_0_117.xml
+.idea/libraries/Maven__commons_lang_commons_lang_2_6.xml
