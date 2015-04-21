@@ -22,9 +22,7 @@ import java.util.List;
 import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
@@ -36,12 +34,12 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 	public final SettingsModelStringArray sourceFields = new SettingsModelStringArray("sourceFields", null);
 	public final SettingsModelStringArray targetFields = new SettingsModelStringArray("targetFields", null);
 	public final SettingsModelStringArray expressions = new SettingsModelStringArray("expressions", null);
-	public final SettingsModelBoolean dropUnderived = new SettingsModelBoolean("dropUnderived",false);
+	public final SettingsModelStringArray flatmap = new SettingsModelStringArray("flatmap",null);
 
     @Override
     protected List<SettingsModel> getComponentSettings() {
         return Arrays.<SettingsModel>
-        asList(sourceFields, targetFields, expressions, dropUnderived);
+        asList(sourceFields, targetFields, flatmap, expressions);
     }
 
     @Override
@@ -52,6 +50,7 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 		String[] srcfields = sourceFields.getStringArrayValue();
 		String[] trgfields = targetFields.getStringArrayValue();
 		String[] exprs = expressions.getStringArrayValue();
+		String[] flatmapstrs = flatmap.getStringArrayValue();
 
 		if (srcfields == null || trgfields == null || exprs == null) {
 			throw new InvalidSettingsException("JSON path expressions are not fully specified.");
@@ -61,9 +60,32 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 			throw new InvalidSettingsException("JSON path expressions are not fully specified.");
 		}
 
-		//operator.setJsonInputField(this.jsonInputField.getStringValue());
-		//operator.setJsonOutputField(this.jsonOutputField.getStringValue());
-		//operator.setJsonPathExpr(this.jsonPathExpr.getStringValue());
-		// operator.setDropUnderivedFields(dropUnderived.getBooleanValue());
+		int srcFieldCount = 0;
+
+		for (int i = 0; i < exprs.length; i++) {
+			if (trgfields[i] == null || trgfields[i].length() == 0) {
+				throw new InvalidSettingsException("Missing target field name.");
+			}
+			if (exprs[i] == null || exprs[i].length() == 0) {
+				throw new InvalidSettingsException("Missing JSONPath expression.");
+			}
+
+			if (srcfields[i] != null && srcfields[i].length() > 0) {
+				srcFieldCount++;
+			}
+		}
+
+		if (srcFieldCount < 1) {
+			throw new InvalidSettingsException("Missing source field name.");
+		}
+
+		if (srcfields[0] == null || srcfields[0].length() == 0) {
+			throw new InvalidSettingsException("Missing source field name for first expression.");
+		}
+
+		operator.setSourceFields(this.sourceFields.getStringArrayValue());
+		operator.setTargetFields(this.targetFields.getStringArrayValue());
+		operator.setExpressions(this.expressions.getStringArrayValue());
+		operator.setFlatMap(flatmap.getStringArrayValue());
 	}
 }

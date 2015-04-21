@@ -27,8 +27,10 @@ import java.util.Map;
 
 
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import com.pervasive.datarush.DRException;
 import com.pervasive.datarush.graphs.LogicalGraph;
 import com.pervasive.datarush.graphs.LogicalGraphFactory;
 
@@ -43,15 +45,19 @@ import com.pervasive.datarush.types.Field;
 import com.pervasive.datarush.types.RecordTokenType;
 import com.pervasive.datarush.types.RecordTokenTypeBuilder;
 import com.pervasive.datarush.types.ScalarTokenType;
+import org.apache.commons.lang.BooleanUtils;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
 
 	private final RecordPort input = newRecordInput("input");
 	private final RecordPort output = newRecordOutput("output");
 
-	private String[] expressions;
-	private String[] sourceFields;
-	private String[] targetFields;
+	private String[] expressions = null;
+	private String[] sourceFields = null;
+	private String[] targetFields = null;
+	private String[] flatmapStrings = null;
+
+	private Boolean[] flatmap;
 	
 	public RecordPort getInput() {
 		return input;
@@ -61,19 +67,38 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		return output;
 	}
 
-	public String[] getExpressions() { return expressions; }
+	public String[] getExpressions() {
+		return expressions;
+	}
 
-	public String[] getSourceFields() { return sourceFields; }
+	public String[] getFlatMap() {
+		return flatmapStrings;
+	}
+
+	public String[] getSourceFields() {
+		return sourceFields;
+	}
 
 	public String[] getTargetFields() {
 		return targetFields;
 	}
 
-	public void setExpressions(String[] s) { this.expressions = s; }
+	public void setExpressions(String[] s) {
+		this.expressions = s;
+	}
 
-	public void setSourceFields(String[] s) { this.sourceFields = s; }
+	public void setFlatMap(String[] s) {
+		this.flatmapStrings = s;
+		flatmap = StringArray2BooleanArray(s);
+	}
 
-	public void setTargetFields(String[] s) { this.targetFields = s; }
+	public void setSourceFields(String[] s) {
+		this.sourceFields = s;
+	}
+
+	public void setTargetFields(String[] s) {
+		this.targetFields = s;
+	}
 
 	public RunJSONPath() {
 
@@ -127,6 +152,48 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
         return result;
 	}
 
+	// Check the operator configuration
+	private boolean checkConfig() {
+		// Make sure all of the mapping arrays exist
+		if (sourceFields == null || targetFields == null || expressions == null) {
+			return false;
+		}
+
+		// Make sure the mapping array lengths are consistent
+		if (sourceFields.length != expressions.length || targetFields.length != expressions.length) {
+			return false;
+		}
+
+		int srcFieldCount = 0;
+
+		// Make sure all of the mappings have a target field name and JSONPath expression
+		for (int i = 0; i < expressions.length; i++) {
+			if (targetFields[i] == null || targetFields[i].length() == 0) {
+				return false;
+			}
+			if (expressions[i] == null || expressions[i].length() == 0) {
+				return false;
+			}
+
+			// Count the source fields
+			if (sourceFields[i] != null && sourceFields[i].length() > 0) {
+				srcFieldCount++;
+			}
+		}
+
+		// Make sure at least one source field is specified for the mappings
+		if (srcFieldCount < 1) {
+			return false;
+		}
+
+		// Make sure the source field for the first mapping is specified
+		if (sourceFields[0] == null || sourceFields[0].length() == 0) {
+			return false;
+		}
+
+        return true;
+	}
+
 	@Override
 	protected void execute(ExecutionContext context) {
 		Configuration configuration = Configuration.defaultConfiguration();
@@ -139,6 +206,20 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		ScalarValued[] allInputs = recordInput.getFields();
 		ScalarSettable[] outputs = TokenUtils.selectFields(recordOutput, recordInput.getType().getNames());
 
+		// Quit early if the operator configuration isn't valid
+		if (checkConfig() == false) {
+			recordOutput.pushEndOfData();
+			return;
+		}
+
+		int flatcnt = 0;
+
+		// Count the number of output fields being flat mapped
+		for (Boolean f : flatmap) {
+			if (f)
+				flatcnt++;
+		}
+
 		while (recordInput.stepNext()) {
 			List<Object> results = new ArrayList<Object>();
 
@@ -146,8 +227,26 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 			// Evaluate each of the JSONPath expressions
 			for (int i = 0; i < targetFields.length; i++) {
+				StringValued inputField = null;
+
+				DocumentContext parsedJSON = null;
+
+				try {
+
+					if (sourceFields[i] != null && sourceFields[i].length() > 0) {
+						inputField = (StringValued) recordInput.getField(sourceFields[i]);
+					}
+					parsedJSON = JsonPath.using(configuration).parse(inputField.asString());
+				}
+				catch (Exception e) {
+					// Todo write source record to reject port
+					throw new DRException("Error parsing JSON " + sourceFields[i], e);
+				}
+				finally {
+
+				}
+
 				String jsonPathExpr = expressions[i];
-				StringValued inputField = (StringValued) recordInput.getField(sourceFields[i]);
 
 				// The output record was generated by merging the input record with a list of new fields
 				// and new fields might have slightly different names if there were any name conflicts.
@@ -155,7 +254,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 				StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
 
 				try {
-					Object res = JsonPath.using(configuration).parse(inputField.asString()).read(jsonPathExpr);
+					Object res = parsedJSON.read(jsonPathExpr);
 
 					results.add(res);
 
@@ -165,34 +264,99 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 							largestListSize = list.size();
 						}
 					}
-
-					if (res instanceof List) {
-						for (Object o : (List) res) {
-							//copy original fields as is into the current row buffer
-							TokenUtils.transfer(allInputs, outputs);
-
-							resultField.set(formatResult(o));
-							recordOutput.push();
-						}
-
-					} else {
-						//copy original fields as is into the current row buffer
-						TokenUtils.transfer(allInputs, outputs);
-
-						resultField.set(formatResult(res));
-						recordOutput.push();
-					}
 				} catch (Exception e) {
 					// todo write records with parse errors to a reject port
+					throw new DRException("Error evaluating JSONPath expression", e);
 				} finally {
 				}
-
 			}
+
+			if (flatcnt == 0) {
+				// No flattening to do.
+
+				// Copy the original input record fields to the corresponding output record fields
+				TokenUtils.transfer(allInputs, outputs);
+
+				for (int i = 0; i < targetFields.length; i++){
+
+					// The output record was generated by merging the input record with a list of new fields
+					// and new fields might have slightly different names if there were any name conflicts.
+					// We need to compute the offset of the current output field rather than look it up by name.
+					StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
+
+					resultField.set(formatResult(results.get(i)));
+				}
+				recordOutput.push();
+			}
+			else {
+				// Generate one output row for each element of the largest result list
+				for (int f = 0; f < largestListSize; f++) {
+
+					// Copy the original input record fields to the corresponding output record fields
+					TokenUtils.transfer(allInputs, outputs);
+
+					for (int i = 0; i < targetFields.length; i++){
+
+						// The output record was generated by merging the input record with a list of new fields
+						// and new fields might have slightly different names if there were any name conflicts.
+						// We need to compute the offset of the current output field rather than look it up by name.
+						StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
+
+						Object o = results.get(i);
+
+						// See if we are flat mapping this result
+						if (flatmap[i] && o instanceof List) {
+							List l = (List) o;
+							if (f < l.size()) {
+								resultField.set(formatResult(l.get(f)));
+							}
+							else {
+								resultField.set((String) null);
+							}
+						} else {
+							resultField.set(formatResult(results.get(i)));
+						}
+
+					}
+					recordOutput.push();
+				}
+			}
+
 		}
 
 		recordOutput.pushEndOfData();
 	}
-	
+
+	public static Boolean[] StringArray2BooleanArray(String[] strings) {
+		List<Boolean> booleans = new ArrayList<Boolean>();
+
+		if (strings != null) {
+			for (String s : strings) {
+				booleans.add(BooleanUtils.toBoolean(s));
+			}
+		}
+
+		Boolean[] result = new Boolean[booleans.size()];
+
+		return booleans.toArray(result);
+	}
+
+	public static String[] BooleanArray2StringArray(Boolean[] booleans) {
+		List<String> strings = new ArrayList<String>();
+
+		if (booleans != null) {
+			for (Boolean b : booleans) {
+				strings.add(b ? "true" : "false");
+			}
+		}
+
+		String[] result = new String[strings.size()];
+
+		return strings.toArray(result);
+	}
+
+
+
 	public static void main(String[] args) {
 		LogicalGraph graph = LogicalGraphFactory.newLogicalGraph();
 // todo need a better test source

@@ -23,6 +23,7 @@ import java.io.StringReader;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 	private static final int SOURCE_COLUMN = 0;
 	private static final int TARGET_COLUMN = 1;
-	private static final int FLATTEN_COLUMN = 2;
+	private static final int FLATMAP_COLUMN = 2;
 	private static final int EXPR_COLUMN = 3;
 
 	private final JSONPathRunnerNodeSettings settings = new JSONPathRunnerNodeSettings();
@@ -65,7 +66,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 	private SourceFieldDomain srcDomain;
 	private ColumnModel<String> srcColumn;
 	private ColumnModel<String> trgColumn;
-	private ColumnModel<Boolean> flattenColumn;
+	private ColumnModel<Boolean> flatmapColumn;
 	private ColumnModel<String> exprColumn;
 	private ColumnMajorTableModel tblModel;
 
@@ -87,7 +88,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 		tblModel= new ColumnMajorTableModel();
 		srcColumn= tblModel.defineColumn("Source Field", srcDomain);
 		trgColumn= tblModel.defineColumn("Output Field", new TextValue());
-		flattenColumn = tblModel.defineColumn("Flatten", new BoolValue());
+		flatmapColumn = tblModel.defineColumn("Flat Map", new BoolValue());
 		exprColumn= tblModel.defineColumn("Expression", new TextValue());
 
 		tblExpressionMapping.setModel(tblModel);
@@ -105,9 +106,9 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 			public int copyRow(int row) {
 				String inField = (String) tblModel.getValueAt(row, SOURCE_COLUMN);
 				String outField = (String) tblModel.getValueAt(row, TARGET_COLUMN);
-				Boolean flatten = (Boolean) tblModel.getValueAt(row, FLATTEN_COLUMN);
+				Boolean flatmap = (Boolean) tblModel.getValueAt(row, FLATMAP_COLUMN);
 				String expression = (String) tblModel.getValueAt(row, EXPR_COLUMN);
-				tblModel.insert(row + 1, new Object[]{inField, outField, flatten, expression});
+				tblModel.insert(row + 1, new Object[]{inField, outField, flatmap, expression});
 				return row + 1;
 			}
 		});
@@ -157,12 +158,12 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 	@Override
 	public void refresh(PortMetadata[] specs) {
-		srcType= ((RecordMetadata) specs[0]).getType();
+		srcType = ((RecordMetadata) specs[0]).getType();
 		srcDomain.setSourceType(srcType);
 
 		srcColumn.setValues(settings.sourceFields.getStringArrayValue());
 		trgColumn.setValues(settings.targetFields.getStringArrayValue());
-		// flattenColumn.setValues(settings.expload.getBooleanArrayValue());
+		flatmapColumn.setValues(RunJSONPath.StringArray2BooleanArray(settings.flatmap.getStringArrayValue()));
 		exprColumn.setValues(settings.expressions.getStringArrayValue());
 	}
 
@@ -176,6 +177,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 		// Apply
 		settings.sourceFields.setStringArrayValue(srcColumn.getValues().toArray(new String[0]));
 		settings.targetFields.setStringArrayValue(trgColumn.getValues().toArray(new String[0]));
+		settings.flatmap.setStringArrayValue(RunJSONPath.BooleanArray2StringArray(flatmapColumn.getValues().toArray(new Boolean[0])));
 	}
 	@Override
 	public Component getComponent() {
@@ -195,31 +197,14 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 			tblExpressionMapping.setSelectedRow(start);
 			tblExpressionMapping.setSelectedColumn(0);
 		}
-
-		// Check for errors
-		for (int i = start; i < end; i++) {
-			String source = (String) tblModel.getValueAt(i, SOURCE_COLUMN);
-			String target = (String) tblModel.getValueAt(i, TARGET_COLUMN);
-			String expression = (String) tblModel.getValueAt(i, EXPR_COLUMN);
-			StringBuilder errors = new StringBuilder();
-
-			if (source == null || source.length() == 0) {
-				errors.append("<p>Source field name cannot be blank.</p>");
-			}
-
-			if (target == null || target.length() == 0) {
-				errors.append("<p>Target field name cannot be blank.</p>");
-			}
-
-			if (expression == null || expression.length() == 0) {
-				errors.append("<p>JSON path expression cannot be blank.</p>");
-			}
-		}
 	}
 
 	private void initComponents() {
 		tblExpressionMapping = new TableEditorPanel();
-		tblExpressionMapping.setBorder(new TitledBorder(null, "JSON Mappings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		tblExpressionMapping.setBorder(new TitledBorder(null, "JSONPath Mappings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+
+		setMinimumSize(new java.awt.Dimension(768, 512));
+		setPreferredSize(new java.awt.Dimension(768, 512));
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
