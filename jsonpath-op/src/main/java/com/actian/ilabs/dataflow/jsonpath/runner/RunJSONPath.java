@@ -91,8 +91,10 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 		// Convert the list of output field names to a schema
 		RecordTokenTypeBuilder typeBuilder = new RecordTokenTypeBuilder();
-		for (String t : targetFields) {
-			typeBuilder.addField(field(STRING, t));
+		if (targetFields != null) {
+			for (String t : targetFields) {
+				typeBuilder.addField(field(STRING, t));
+			}
 		}
 
 		//required: declare output type

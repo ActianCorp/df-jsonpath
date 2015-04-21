@@ -30,18 +30,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import com.pervasive.datarush.knime.coreui.common.*;
 import org.knime.core.node.InvalidSettingsException;
 
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel;
 import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
 import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.EditCondition;
-import com.pervasive.datarush.knime.coreui.common.SourceFieldDomain;
-import com.pervasive.datarush.knime.coreui.common.CustomDialogComponent;
-import com.pervasive.datarush.knime.coreui.common.TableEditorPanel;
 import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
 import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.EditHandler;
-import com.pervasive.datarush.knime.coreui.common.TextValue;
 
 import com.pervasive.datarush.ports.PortMetadata;
 import com.pervasive.datarush.ports.record.RecordMetadata;
@@ -60,7 +55,8 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 	private static final int SOURCE_COLUMN = 0;
 	private static final int TARGET_COLUMN = 1;
-	private static final int EXPR_COLUMN = 2;
+	private static final int FLATTEN_COLUMN = 2;
+	private static final int EXPR_COLUMN = 3;
 
 	private final JSONPathRunnerNodeSettings settings = new JSONPathRunnerNodeSettings();
 
@@ -69,7 +65,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 	private SourceFieldDomain srcDomain;
 	private ColumnModel<String> srcColumn;
 	private ColumnModel<String> trgColumn;
-	// private ColumnModel<boolean> explodeColumn;
+	private ColumnModel<Boolean> flattenColumn;
 	private ColumnModel<String> exprColumn;
 	private ColumnMajorTableModel tblModel;
 
@@ -91,24 +87,27 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 		tblModel= new ColumnMajorTableModel();
 		srcColumn= tblModel.defineColumn("Source Field", srcDomain);
 		trgColumn= tblModel.defineColumn("Output Field", new TextValue());
-		// explodeColumn = tblModel.defineColumn("Explode Lists", new)
+		flattenColumn = tblModel.defineColumn("Flatten", new BoolValue());
 		exprColumn= tblModel.defineColumn("Expression", new TextValue());
 
 		tblExpressionMapping.setModel(tblModel);
 		tblExpressionMapping.setRowMembershipHandler(tblModel.createMembershipHandler(new EntryGenerator()));
 		tblExpressionMapping.setRowMoveHandler(tblModel.createMoveHandler());
-		tblExpressionMapping.setRowEditHandler(new EditHandler() {
+		/*
+		 tblExpressionMapping.setRowEditHandler(new EditHandler() {
 			@Override
 			public void editRow(int row) {
 			}
 		});
+		*/
 		tblExpressionMapping.setRowCopyHandler(new CopyHandler() {
 			@Override
 			public int copyRow(int row) {
 				String inField = (String) tblModel.getValueAt(row, SOURCE_COLUMN);
 				String outField = (String) tblModel.getValueAt(row, TARGET_COLUMN);
+				Boolean flatten = (Boolean) tblModel.getValueAt(row, FLATTEN_COLUMN);
 				String expression = (String) tblModel.getValueAt(row, EXPR_COLUMN);
-				tblModel.insert(row + 1, new Object[]{inField, outField, expression, ""});
+				tblModel.insert(row + 1, new Object[]{inField, outField, flatten, expression});
 				return row + 1;
 			}
 		});
@@ -118,8 +117,42 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 	private class EntryGenerator implements DefaultGenerator {
 		@Override
 		public Object[] getDefaultRow(ColumnMajorTableModel model) {
-			return new Object[] { "field" + model.getRowCount(), "0", "" };
+			return new Object[] { "", "jsonpath" + model.getRowCount(), false, "$..*"};
 		}
+	}
+
+	private class BoolValue implements ColumnValueDomain<Boolean> {
+
+		@Override
+		public Component render(TableCellEditors.TableCellRendererContext context, int row, Object value) {
+			// String replacementValue = (String) value;
+			// context.getLabel().setText(replacementValue);
+			Boolean replacementValue = (Boolean) value;
+			context.getCheckBox().setSelected(replacementValue.booleanValue());
+			return context.getCheckBox();
+		}
+
+		@Override
+		public Component getEditorComponent(TableCellEditors.TableCellEditorContext context, int row) {
+			// return context.getText();
+			return context.getCheckBox();
+		}
+
+		@Override
+		public void startEditing(TableCellEditors.TableCellEditorContext context, int row, Object value) {
+			// context.getText().setText((String) value);
+			// context.getText().selectAll();
+			Boolean replacementValue = (Boolean) value;
+			context.getCheckBox().setSelected(replacementValue.booleanValue());
+		}
+
+		@Override
+		public Object stopEditing(TableCellEditors.TableCellEditorContext context, int row) {
+//			return context.getText().getText();
+			Boolean state =  context.getCheckBox().isSelected();
+			return state;
+		}
+
 	}
 
 	@Override
@@ -129,8 +162,8 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 		srcColumn.setValues(settings.sourceFields.getStringArrayValue());
 		trgColumn.setValues(settings.targetFields.getStringArrayValue());
+		// flattenColumn.setValues(settings.expload.getBooleanArrayValue());
 		exprColumn.setValues(settings.expressions.getStringArrayValue());
-		chckbxDropUnderivedFields.setSelected(settings.dropUnderived.getBooleanValue());
 	}
 
 	@Override
@@ -143,7 +176,6 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 		// Apply
 		settings.sourceFields.setStringArrayValue(srcColumn.getValues().toArray(new String[0]));
 		settings.targetFields.setStringArrayValue(trgColumn.getValues().toArray(new String[0]));
-		settings.dropUnderived.setBooleanValue(chckbxDropUnderivedFields.isSelected());
 	}
 	@Override
 	public Component getComponent() {
@@ -187,9 +219,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 
 	private void initComponents() {
 		tblExpressionMapping = new TableEditorPanel();
-		tblExpressionMapping.setBorder(new TitledBorder(null, "Derived Outputs", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-
-		chckbxDropUnderivedFields = new JCheckBox("Drop Underived Fields");
+		tblExpressionMapping.setBorder(new TitledBorder(null, "JSON Mappings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
@@ -197,8 +227,7 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 						.addGroup(groupLayout.createSequentialGroup()
 								.addContainerGap()
 								.addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-										.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(chckbxDropUnderivedFields))
+										.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 								.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -206,14 +235,12 @@ import com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath;
 						.addGroup(groupLayout.createSequentialGroup()
 								.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 								.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(chckbxDropUnderivedFields)
 								.addContainerGap())
 		);
 		setLayout(groupLayout);
 	}
 
 	private TableEditorPanel tblExpressionMapping;
-	private JCheckBox chckbxDropUnderivedFields;
 
 }
 

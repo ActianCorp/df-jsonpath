@@ -54,11 +54,11 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 		String[] exprs = expressions.getStringArrayValue();
 
 		if (srcfields == null || trgfields == null || exprs == null) {
-			throw new InvalidSettingsException("JSON path expressions not fully specified.");
+			throw new InvalidSettingsException("JSON path expressions are not fully specified.");
 		}
 
 		if (srcfields.length != exprs.length || trgfields.length != exprs.length) {
-			throw new InvalidSettingsException("JSON path expressions not fully specified.");
+			throw new InvalidSettingsException("JSON path expressions are not fully specified.");
 		}
 
 		//operator.setJsonInputField(this.jsonInputField.getStringValue());
