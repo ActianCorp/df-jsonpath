@@ -225,26 +225,25 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 			int largestListSize = 0;
 
+			DocumentContext parsedJSON = null;
+
 			// Evaluate each of the JSONPath expressions
 			for (int i = 0; i < targetFields.length; i++) {
 				StringValued inputField = null;
 
-				DocumentContext parsedJSON = null;
-
-				try {
+				// try {
 
 					if (sourceFields[i] != null && sourceFields[i].length() > 0) {
 						inputField = (StringValued) recordInput.getField(sourceFields[i]);
 					}
 					parsedJSON = JsonPath.using(configuration).parse(inputField.asString());
-				}
-				catch (Exception e) {
+				//}
+				//catch (Exception e) {
 					// Todo write source record to reject port
-					throw new DRException("Error parsing JSON " + sourceFields[i], e);
-				}
-				finally {
-
-				}
+				//	throw new DRException("Error parsing JSON " + sourceFields[i], e);
+				//}
+				//finally {
+				//}
 
 				String jsonPathExpr = expressions[i];
 
@@ -253,21 +252,23 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 				// We need to compute the offset of the current output field rather than look it up by name.
 				StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
 
+				Object res = null;
+
 				try {
-					Object res = parsedJSON.read(jsonPathExpr);
+					res = parsedJSON.read(jsonPathExpr);
+				} catch (Exception e) {
+					// todo write records with parse errors to a reject port
+				//	throw new DRException("Error evaluating JSONPath expression", e);
+				} finally {
 
 					results.add(res);
 
-					if (res instanceof List) {
+					if (res != null && res instanceof List) {
 						List list = (List) res;
 						if (list.size() > largestListSize) {
 							largestListSize = list.size();
 						}
 					}
-				} catch (Exception e) {
-					// todo write records with parse errors to a reject port
-					throw new DRException("Error evaluating JSONPath expression", e);
-				} finally {
 				}
 			}
 
@@ -321,7 +322,6 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 					recordOutput.push();
 				}
 			}
-
 		}
 
 		recordOutput.pushEndOfData();
@@ -359,14 +359,23 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	public static void main(String[] args) {
 		LogicalGraph graph = LogicalGraphFactory.newLogicalGraph();
-// todo need a better test source
-		// Use weather alert data from NOAA as the source
-		ReadDelimitedText reader = graph.add(new ReadDelimitedText("http://www.ncdc.noaa.gov/swdiws/csv/warn/id=533623"));
-		reader.setHeader(true);
-		RunJSONPath runner = graph.add(new RunJSONPath());
-		WriteDelimitedText writer = graph.add(new WriteDelimitedText());
+		ReadDelimitedText reader = graph.add(new ReadDelimitedText("/Users/paul/twitterdemo.csv"));
+		reader.setHeader(false);
+		reader.setFieldDelimiter("");
+		reader.setFieldEndDelimiter("");
+		reader.setRecordSeparator("\r\n");
+		reader.setFieldSeparator("\u0000");
 
-		//runner.setJsonPathExpr("RECORD(__data, __values, __types) ::= \"<__values><\\n>\"");
+		String[] sflds = {"field0"};
+		String[] tflds = {"id"};
+		String[] expr = { "$.id"};
+		String[] flatmap = { "false"};
+		RunJSONPath runner = graph.add(new RunJSONPath());
+		runner.setExpressions(expr);
+		runner.setFlatMap(flatmap);
+		runner.setSourceFields(sflds);
+		runner.setTargetFields(tflds);
+		WriteDelimitedText writer = graph.add(new WriteDelimitedText());
 		writer.setFieldEndDelimiter("]]");
 		writer.setFieldStartDelimiter("[[");
 		writer.setFieldDelimiter("|");
