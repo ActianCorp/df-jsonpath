@@ -395,7 +395,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	public static void main(String[] args) {
 		LogicalGraph graph = LogicalGraphFactory.newLogicalGraph();
-		ReadDelimitedText reader = graph.add(new ReadDelimitedText("/Users/paul/twitterdemo.csv"));
+		ReadDelimitedText reader = graph.add(new ReadDelimitedText("https://raw.githubusercontent.com/ActianCorp/df-jsonpath/master/examples/KNIME/twitterdemo.txt"));
 		reader.setHeader(false);
 		reader.setFieldDelimiter("");
 		reader.setFieldEndDelimiter("");
@@ -403,9 +403,9 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		reader.setFieldSeparator("\u0000");
 
 		String[] sflds = {"field0"};
-		String[] tflds = {"id"};
-		String[] expr = { "$.id"};
-		String[] flatmap = { "false"};
+		String[] tflds = {"id", "hashtags"};
+		String[] expr = { "$.id", "$.entities.hashtags..text"};
+		String[] flatmap = { "false", "true"};
 		RunJSONPath runner = graph.add(new RunJSONPath());
 		runner.setExpressions(expr);
 		runner.setFlatMap(flatmap);
@@ -414,7 +414,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		WriteDelimitedText writer = graph.add(new WriteDelimitedText());
 		writer.setFieldEndDelimiter("]]");
 		writer.setFieldStartDelimiter("[[");
-		writer.setFieldDelimiter("|");
+		writer.setFieldDelimiter(",");
 		writer.setHeader(false);
 		writer.setTarget("stdout:");
 		writer.setMode(OVERWRITE);

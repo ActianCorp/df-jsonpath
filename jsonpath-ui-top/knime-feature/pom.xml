@@ -20,12 +20,12 @@
     <groupId>com.actian.ilabs.dataflow</groupId>
     <artifactId>com.actian.ilabs.dataflow.jsonpath.ui.feature</artifactId>
     <packaging>eclipse-feature</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <parent>
         <groupId>com.actian.ilabs.dataflow</groupId>
         <artifactId>jsonpath-ui-top</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
 </project>

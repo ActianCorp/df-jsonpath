@@ -17,7 +17,7 @@
 <feature
         id="com.actian.ilabs.dataflow.jsonpath.ui.feature"
         label="Actian ILabs JSONPath Component"
-        version="1.0.0"
+        version="1.0.1"
         provider-name="Actian Corporation">
 
     <description>This is the Actian ILabs JSONPath Component feature.</description>
@@ -46,7 +46,7 @@
     </url>
 
     <requires>
-        <import feature="org.knime.features.base" version="2.11.0" match="compatible"/>
+        <import feature="org.knime.features.base" version="2.9.0" match="compatible"/>
     </requires>
 
     <plugin

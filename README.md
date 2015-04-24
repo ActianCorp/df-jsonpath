@@ -19,12 +19,12 @@ To build, run:
 
 ## Using the JSONPath Runner with the DataFlow Engine
 
-The build generates a JAR file in df-jsonpath-runner/jsonpath-op/target called jsonpath-op-1.0.0.jar which can be included on the classpath when using the DataFlow engine.
+The build generates a JAR file in df-jsonpath-runner/jsonpath-op/target called jsonpath-op-1.*y.z*.jar which can be included on the classpath when using the DataFlow engine.
 
 ## Installing the JSONPath Runner plug-in in KNIME
 
 The build also produces a ZIP file which can be used as an archive file with the KNIME 'Help/Install New Software...' dialog.
-The ZIP file can be found in df-jsonpath-runner/jsonpath-ui-top/update-site/target and is called com.actian.ilabs.dataflow.jsonpath.ui.update-1.0.0.zip
+The ZIP file can be found in df-jsonpath-runner/jsonpath-ui-top/update-site/target and is called com.actian.ilabs.dataflow.jsonpath.ui.update-1.*y.z*.zip
 
 The file examples/KNIME/JSONPath_Runner_Example.zip contains a KNIME workflow that can be imported into KNIME and used to test the plug-in.
 
