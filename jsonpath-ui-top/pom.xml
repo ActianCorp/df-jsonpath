@@ -21,7 +21,7 @@
     <groupId>com.actian.ilabs.dataflow</groupId>
     <artifactId>jsonpath-ui-top</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <modules>
         <module>knime-feature</module>
         <module>knime-plugin</module>

@@ -22,7 +22,7 @@
     <groupId>com.actian.ilabs.dataflow</groupId>
     <artifactId>jsonpath</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <modules>
         <module>jsonpath-op-deps</module>
         <module>jsonpath-op</module>
