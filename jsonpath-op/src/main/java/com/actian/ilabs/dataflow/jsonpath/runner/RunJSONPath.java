@@ -250,10 +250,14 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 				try {
 
+					// Use the previously parsed object if a new is not specified.
 					if (i < sourceFields.length && sourceFields[i] != null && sourceFields[i].length() > 0) {
-						inputField = (StringValued) recordInput.getField(sourceFields[i]);
 
-						parsedJSON = JsonPath.using(configuration).parse(inputField.asString());
+						// Only parse the source if it is different from the previously parsed JSON object.
+						if (inputField != recordInput.getField(sourceFields[i])) {
+							inputField = (StringValued) recordInput.getField(sourceFields[i]);
+							parsedJSON = JsonPath.using(configuration).parse(inputField.asString());
+						}
 					}
 				}
 				// catch (JsonPathException e)
