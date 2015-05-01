@@ -18,7 +18,7 @@
     -->
 
     <modelVersion>4.0.0</modelVersion>
-    <name>JSONPath Component UI top-level project</name>
+    <name>JSONPath Component top-level project</name>
     <groupId>com.actian.ilabs.dataflow</groupId>
     <artifactId>jsonpath</artifactId>
     <packaging>pom</packaging>
