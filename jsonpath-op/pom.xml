@@ -22,7 +22,14 @@
     <groupId>com.actian.ilabs.dataflow</groupId>
     <artifactId>jsonpath-op</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+
+    <parent>
+        <groupId>com.actian.ilabs.dataflow</groupId>
+        <artifactId>jsonpath</artifactId>
+        <version>1.0.2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
     <dependencies>
          <dependency>
             <groupId>com.jayway.jsonpath</groupId>

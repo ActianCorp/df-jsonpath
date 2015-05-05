@@ -17,7 +17,7 @@
 <feature
         id="com.actian.ilabs.dataflow.jsonpath.ui.feature"
         label="Actian ILabs JSONPath Component"
-        version="1.0.1"
+        version="1.0.2.qualifier"
         provider-name="Actian Corporation">
 
     <description>This is the Actian ILabs JSONPath Component feature.</description>
