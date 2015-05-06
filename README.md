@@ -16,6 +16,12 @@ The update site is built using [Apache Maven 3.0.5 or later](http://maven.apache
 To build, run:
 
     mvn clean install
+    
+You can update the version number by running
+
+    mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=version
+    
+where version is of the form x.y.z or x.y.z-SNAPSHOT.
 
 ## Using the JSONPath Runner with the DataFlow Engine
 
