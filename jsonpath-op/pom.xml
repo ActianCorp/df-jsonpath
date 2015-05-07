@@ -42,6 +42,11 @@
             <version>2.1.1</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.5</version>
+        </dependency>
+        <dependency>
             <groupId>com.pervasive.datarush</groupId>
             <artifactId>datarush-library</artifactId>
             <version>${env.DATAFLOW_VER}</version>

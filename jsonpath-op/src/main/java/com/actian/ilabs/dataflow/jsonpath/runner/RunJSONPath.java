@@ -24,11 +24,19 @@ import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.Option;
 
 import com.jayway.jsonpath.JsonPathException;
 import com.pervasive.datarush.DRException;
@@ -109,6 +117,32 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 	public RunJSONPath() {
 
 	}
+
+	static {
+		Configuration.setDefaults(new Configuration.Defaults() {
+
+			private final JsonProvider jsonProvider = new JacksonJsonProvider();
+			private final MappingProvider mappingProvider = new JacksonMappingProvider();
+			private final Set<Option> options = EnumSet.noneOf(Option.class);
+
+			@Override
+			public JsonProvider jsonProvider() {
+				return jsonProvider;
+			}
+
+			@Override
+			public MappingProvider mappingProvider() {
+				return mappingProvider;
+			}
+
+			@Override
+			public Set<Option> options() {
+				return options;
+			}
+		});
+	}
+
+
 
 	@Override
 	protected void computeMetadata(StreamingMetadataContext context) {
@@ -208,7 +242,6 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 	@Override
 	protected void execute(ExecutionContext context) {
 		Configuration configuration = Configuration.defaultConfiguration();
-
 		// configuration = configuration.addOptions(Option.ALWAYS_RETURN_LIST);
 
 		RecordInput recordInput = getInput().getInput(context);
@@ -260,7 +293,6 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 						}
 					}
 				}
-				// catch (JsonPathException e)
 				catch (Exception e)
 				{
 					// Copy the original input record fields to the corresponding reject record fields
@@ -279,7 +311,6 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 				try {
 					res = parsedJSON.read(jsonPathExpr);
 				}
-//				catch (JsonPathException e)
 				catch (Exception e)
 				{
 					// Copy the original input record fields to the corresponding reject record fields
