@@ -32,10 +32,14 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import net.minidev.json.parser.JSONParser;
+
 import com.jayway.jsonpath.spi.json.JsonProvider;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonSmartJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import com.jayway.jsonpath.Option;
 
 import com.jayway.jsonpath.JsonPathException;
@@ -57,6 +61,18 @@ import com.pervasive.datarush.types.ScalarTokenType;
 import org.apache.commons.lang.BooleanUtils;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
+
+	public static final Configuration GSON_CONFIGURATION = Configuration
+			.builder()
+			.mappingProvider(new GsonMappingProvider())
+			.jsonProvider(new GsonJsonProvider())
+			.build();
+
+	public static final Configuration JSON_SMART_CONFIGURATION = Configuration
+			.builder()
+			.mappingProvider(new JsonSmartMappingProvider())
+			.jsonProvider(new JsonSmartJsonProvider(JSONParser.MODE_PERMISSIVE ^ JSONParser.USE_HI_PRECISION_FLOAT))
+			.build();
 
 	private final RecordPort input = newRecordInput("input");
 	private final RecordPort output = newRecordOutput("output");
@@ -118,32 +134,6 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	}
 
-	static {
-		Configuration.setDefaults(new Configuration.Defaults() {
-
-			private final JsonProvider jsonProvider = new JacksonJsonProvider();
-			private final MappingProvider mappingProvider = new JacksonMappingProvider();
-			private final Set<Option> options = EnumSet.noneOf(Option.class);
-
-			@Override
-			public JsonProvider jsonProvider() {
-				return jsonProvider;
-			}
-
-			@Override
-			public MappingProvider mappingProvider() {
-				return mappingProvider;
-			}
-
-			@Override
-			public Set<Option> options() {
-				return options;
-			}
-		});
-	}
-
-
-
 	@Override
 	protected void computeMetadata(StreamingMetadataContext context) {
 		//best practice: perform any input validation: should be done first
@@ -181,7 +171,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		reject.setOutputDataOrdering(context, DataOrdering.UNSPECIFIED);
 	}
 
-	private String formatResult(Object o) {
+	private String formatResult(Configuration configuration, Object o) {
 		String result = null;
 
 		if (o instanceof String) {
@@ -191,7 +181,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		} else if (o instanceof Boolean) {
 			result = o.toString();
 		} else {
-			result = o != null ? Configuration.defaultConfiguration().jsonProvider().toJson(o) : "null";
+			result = o != null ? configuration.jsonProvider().toJson(o) : "null";
 		}
 
         return result;
@@ -241,8 +231,10 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	@Override
 	protected void execute(ExecutionContext context) {
-		Configuration configuration = Configuration.defaultConfiguration();
-		// configuration = configuration.addOptions(Option.ALWAYS_RETURN_LIST);
+		// Configuration configuration = Configuration.defaultConfiguration();
+		// Configuration configuration = GSON_CONFIGURATION;
+		Configuration configuration = JSON_SMART_CONFIGURATION;
+
 
 		RecordInput recordInput = getInput().getInput(context);
 		RecordOutput recordOutput = getOutput().getOutput(context);
@@ -351,7 +343,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 					// We need to compute the offset of the current output field rather than look it up by name.
 					StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
 
-					resultField.set(formatResult(results.get(i)));
+					resultField.set(formatResult(configuration, results.get(i)));
 				}
 				recordOutput.push();
 			}
@@ -375,13 +367,13 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 						if (flatmap[i] && o instanceof List) {
 							List l = (List) o;
 							if (f < l.size()) {
-								resultField.set(formatResult(l.get(f)));
+								resultField.set(formatResult(configuration, l.get(f)));
 							}
 							else {
 								resultField.set((String) null);
 							}
 						} else {
-							resultField.set(formatResult(results.get(i)));
+							resultField.set(formatResult(configuration, results.get(i)));
 						}
 
 					}
