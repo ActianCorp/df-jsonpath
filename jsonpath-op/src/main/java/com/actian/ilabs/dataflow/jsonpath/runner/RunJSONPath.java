@@ -211,7 +211,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 			}
 
 			// Count the source fields
-			if (sourceFields[i] != null && sourceFields[i].length() > 0) {
+			if (i < sourceFields.length && sourceFields[i] != null && sourceFields[i].length() > 0) {
 				srcFieldCount++;
 			}
 		}
@@ -420,8 +420,7 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		LogicalGraph graph = LogicalGraphFactory.newLogicalGraph();
 		ReadDelimitedText reader = graph.add(new ReadDelimitedText("https://raw.githubusercontent.com/ActianCorp/df-jsonpath/master/examples/KNIME/twitterdemo.txt"));
 		reader.setHeader(false);
-		reader.setFieldDelimiter("");
-		reader.setFieldEndDelimiter("");
+		reader.setFieldDelimiter("\uffff");
 		reader.setRecordSeparator("\r\n");
 		reader.setFieldSeparator("\u0000");
 
