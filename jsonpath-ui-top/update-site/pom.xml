@@ -24,7 +24,7 @@
     <parent>
         <groupId>com.actian.ilabs.dataflow</groupId>
         <artifactId>jsonpath-ui-top</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -39,19 +39,19 @@
         <dependency>
             <groupId>com.actian.ilabs.dataflow</groupId>
             <artifactId>com.actian.ilabs.dataflow.jsonpath.ui.plugin</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.actian.ilabs.dataflow</groupId>
             <artifactId>com.actian.ilabs.dataflow.jsonpath.ui.plugin</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2</version>
             <classifier>p2metadata</classifier>
             <type>xml</type>
         </dependency>
         <dependency>
             <groupId>com.actian.ilabs.dataflow</groupId>
             <artifactId>com.actian.ilabs.dataflow.jsonpath.ui.plugin</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2</version>
             <classifier>p2artifacts</classifier>
             <type>xml</type>
         </dependency>
