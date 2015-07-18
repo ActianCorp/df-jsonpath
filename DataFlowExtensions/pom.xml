@@ -15,20 +15,22 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.actian.ilabs.dataflow</groupId>
-    <artifactId>jsonpath-op</artifactId>
+    <name>JSONPath - DataFlow Extensions</name>
+    <groupId>com.actian.services.dataflow</groupId>
+    <artifactId>jsonpath-dataflow-operator</artifactId>
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.actian.ilabs.dataflow</groupId>
+        <groupId>com.actian.services.dataflow</groupId>
         <artifactId>jsonpath</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
          <dependency>
@@ -82,7 +84,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.actian.ilabs.dataflow.jsonpath.runner.RunJSONPath</mainClass>
+                            <mainClass>com.actian.services.dataflow.jsonpath.runner.RunJSONPath</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

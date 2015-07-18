@@ -18,16 +18,16 @@
     -->
 
     <modelVersion>4.0.0</modelVersion>
-    <name>JSONPath Component top-level project</name>
-    <groupId>com.actian.ilabs.dataflow</groupId>
+    <name>JSONPath</name>
+    <groupId>com.actian.services.dataflow</groupId>
     <artifactId>jsonpath</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <modules>
-        <module>jsonpath-op-deps</module>
-        <module>jsonpath-op</module>
-        <module>jsonpath-ui-top</module>
+        <module>DataFlowDependencies</module>
+        <module>DataFlowExtensions</module>
+        <module>KnimeExtensions</module>
     </modules>
 
     <properties>

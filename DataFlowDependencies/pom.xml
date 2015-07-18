@@ -20,14 +20,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.actian.ilabs.dataflow</groupId>
-    <artifactId>jsonpath-deps</artifactId>
+    <name>JSONPath - DataFlow Extension Dependencies</name>
+    <groupId>com.actian.services.dataflow</groupId>
+    <artifactId>jsonpath-dataflow-dependencies</artifactId>
     <packaging>pom</packaging>
 
     <parent>
-        <groupId>com.actian.ilabs.dataflow</groupId>
+        <groupId>com.actian.services.dataflow</groupId>
         <artifactId>jsonpath</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
