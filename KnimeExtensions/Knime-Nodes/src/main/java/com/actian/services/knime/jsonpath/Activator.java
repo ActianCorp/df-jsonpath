@@ -1,4 +1,4 @@
-package com.actian.ilabs.dataflow.jsonpath.ui;
+package com.actian.services.knime.jsonpath;
 
 /*
 		Copyright 2015 Actian Corporation
@@ -25,7 +25,7 @@ import org.osgi.framework.BundleContext;
 public class Activator implements BundleActivator{
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "com.actian.ilabs.dataflow.jsonpath.ui";
+	public static final String PLUGIN_ID = "com.actian.services.knime.jsonpath";
 
 	// The shared instance
 	private static Activator plugin;
