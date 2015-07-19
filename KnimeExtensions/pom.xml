@@ -31,6 +31,7 @@
     <modules>
         <module>Knime-Feature</module>
         <module>Knime-Nodes</module>
+        <module>Knime-Functions</module>
         <module>Knime-Update-Site</module>
     </modules>
 

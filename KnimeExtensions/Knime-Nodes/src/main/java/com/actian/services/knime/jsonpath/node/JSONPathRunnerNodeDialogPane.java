@@ -17,26 +17,22 @@ package com.actian.services.knime.jsonpath.node;
 */
 
 
-import java.awt.Component;
+import com.actian.services.dataflow.operators.RunJSONPath;
+import com.pervasive.datarush.knime.coreui.common.*;
+import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
+import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
+import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
+import com.pervasive.datarush.ports.PortMetadata;
+import com.pervasive.datarush.ports.record.RecordMetadata;
+import com.pervasive.datarush.types.RecordTokenType;
+import com.pervasive.datarush.types.TokenTypeConstant;
+import org.knime.core.node.InvalidSettingsException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-
-import com.pervasive.datarush.knime.coreui.common.*;
-import org.knime.core.node.InvalidSettingsException;
-
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
-import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
-
-import com.pervasive.datarush.ports.PortMetadata;
-import com.pervasive.datarush.ports.record.RecordMetadata;
-import com.pervasive.datarush.types.RecordTokenType;
-import com.pervasive.datarush.types.TokenTypeConstant;
-
-import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
+import java.awt.*;
 
 
 /*package*/ final class JSONPathRunnerNodeDialogPane extends JPanel implements CustomDialogComponent<RunJSONPath>, TableModelListener {

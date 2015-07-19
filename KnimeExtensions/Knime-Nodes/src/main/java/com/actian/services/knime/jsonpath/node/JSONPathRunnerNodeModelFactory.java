@@ -16,7 +16,7 @@ package com.actian.services.knime.jsonpath.node;
 		limitations under the License.
 */
 
-import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
+import com.actian.services.dataflow.operators.RunJSONPath;
 import com.pervasive.datarush.knime.core.framework.AbstractDRNodeFactory;
 import com.pervasive.datarush.knime.core.framework.DRNodeModel;
 import com.pervasive.datarush.knime.coreui.common.CustomDRNodeDialogPane;

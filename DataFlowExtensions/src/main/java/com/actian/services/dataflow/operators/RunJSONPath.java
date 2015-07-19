@@ -1,4 +1,4 @@
-package com.actian.services.dataflow.jsonpath.runner;
+package com.actian.services.dataflow.operators;
 
 /*
 		Copyright 2015 Actian Corporation
@@ -24,8 +24,6 @@ import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
 
 
 import com.jayway.jsonpath.Configuration;
@@ -34,16 +32,11 @@ import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.parser.JSONParser;
 
-import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonSmartJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider;
-import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
-import com.jayway.jsonpath.Option;
 
-import com.jayway.jsonpath.JsonPathException;
-import com.pervasive.datarush.DRException;
 import com.pervasive.datarush.graphs.LogicalGraph;
 import com.pervasive.datarush.graphs.LogicalGraphFactory;
 
@@ -54,10 +47,8 @@ import com.pervasive.datarush.ports.physical.*;
 import com.pervasive.datarush.ports.record.*;
 import com.pervasive.datarush.tokens.TokenUtils;
 import com.pervasive.datarush.tokens.scalar.*;
-import com.pervasive.datarush.types.Field;
 import com.pervasive.datarush.types.RecordTokenType;
 import com.pervasive.datarush.types.RecordTokenTypeBuilder;
-import com.pervasive.datarush.types.ScalarTokenType;
 import org.apache.commons.lang.BooleanUtils;
 
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {

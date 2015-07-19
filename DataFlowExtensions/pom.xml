@@ -84,7 +84,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.actian.services.dataflow.jsonpath.runner.RunJSONPath</mainClass>
+                            <mainClass>com.actian.services.dataflow.operators.RunJSONPath</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

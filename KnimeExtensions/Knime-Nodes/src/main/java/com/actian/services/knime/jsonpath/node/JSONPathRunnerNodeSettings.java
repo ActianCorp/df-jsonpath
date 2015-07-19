@@ -19,7 +19,7 @@ package com.actian.services.knime.jsonpath.node;
 import java.util.Arrays;
 import java.util.List;
 
-import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
+import com.actian.services.dataflow.operators.RunJSONPath;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
