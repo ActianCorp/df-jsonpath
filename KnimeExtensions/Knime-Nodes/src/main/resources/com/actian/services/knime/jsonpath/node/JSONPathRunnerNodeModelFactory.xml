@@ -56,7 +56,7 @@
 
     <ports>
         <inPort index="0" name="Source records">Source records</inPort>
-        <outPort index="0" name="Generated text">Output records.   The schema used for the output port is a combination of
+        <outPort index="0" name="Output records">Output records.   The schema used for the output port is a combination of
             the input schema and the list of output (text) fields from the JSONPath mappings.
         </outPort>
         <outPort index="1" name="Rejected records">Records with JSON parse errors.  The schema for the reject record

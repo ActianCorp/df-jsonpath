@@ -23,9 +23,11 @@ import com.actian.services.dataflow.operators.RunJSONPath;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import com.pervasive.datarush.knime.core.framework.AbstractDRSettingsModel;
+import com.pervasive.datarush.knime.core.util.OptionalSettingsModelBoolean;
 import com.pervasive.datarush.ports.PortMetadata;
 
 /*package*/ 
@@ -36,10 +38,14 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 	public final SettingsModelStringArray expressions = new SettingsModelStringArray("expressions", null);
 	public final SettingsModelStringArray flatmap = new SettingsModelStringArray("flatmap",null);
 
-    @Override
+	public final OptionalSettingsModelBoolean excludeJSONFields = new OptionalSettingsModelBoolean("excludeJSONFields",false);
+	public final OptionalSettingsModelBoolean nullMissingLeaf = new OptionalSettingsModelBoolean("nullMissingLeaf",false);
+
+
+	@Override
     protected List<SettingsModel> getComponentSettings() {
         return Arrays.<SettingsModel>
-        asList(sourceFields, targetFields, flatmap, expressions);
+        asList(sourceFields, targetFields, flatmap, expressions, excludeJSONFields, nullMissingLeaf);
     }
 
     @Override
@@ -87,5 +93,8 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 		operator.setTargetFields(this.targetFields.getStringArrayValue());
 		operator.setExpressions(this.expressions.getStringArrayValue());
 		operator.setFlatMap(flatmap.getStringArrayValue());
+
+        operator.setExcludeJSONFields(this.excludeJSONFields.getBooleanValue());
+        operator.setNullMissingLeaf(this.nullMissingLeaf.getBooleanValue());
 	}
 }

@@ -30,6 +30,15 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.pervasive.datarush.annotations.PortDescription;
+import com.pervasive.datarush.annotations.PropertyDescription;
+
 import net.minidev.json.parser.JSONParser;
 
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
@@ -51,6 +60,7 @@ import com.pervasive.datarush.types.RecordTokenType;
 import com.pervasive.datarush.types.RecordTokenTypeBuilder;
 import org.apache.commons.lang.BooleanUtils;
 
+@JsonSerialize(include=Inclusion.NON_DEFAULT)
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
 
 	public static final Configuration GSON_CONFIGURATION = Configuration
@@ -73,39 +83,37 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 	private String[] sourceFields = null;
 	private String[] targetFields = null;
 	private String[] flatmapStrings = null;
+	private boolean excludeJSONFields = false;
+	private boolean nullMissingLeaf = false;
 
 	private Boolean[] flatmap;
-	
+
+	@PortDescription("Source records")
 	public RecordPort getInput() {
 		return input;
 	}
-	
+
+	@PortDescription("Output records")
 	public RecordPort getOutput() {
 		return output;
 	}
 
+	@PortDescription("Rejected records")
 	public RecordPort getReject() {
 		return reject;
 	}
 
+	@PropertyDescription("JSONPath expression list")
 	public String[] getExpressions() {
 		return expressions;
 	}
-
-	public String[] getFlatMap() {
-		return flatmapStrings;
-	}
-
-	public String[] getSourceFields() {
-		return sourceFields;
-	}
-
-	public String[] getTargetFields() {
-		return targetFields;
-	}
-
 	public void setExpressions(String[] s) {
 		this.expressions = s;
+	}
+
+	@PropertyDescription("Flat Map indicator list")
+	public String[] getFlatMap() {
+		return flatmapStrings;
 	}
 
 	public void setFlatMap(String[] s) {
@@ -113,16 +121,35 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		flatmap = StringArray2BooleanArray(s);
 	}
 
+	@PropertyDescription("JSON source field list")
+	public String[] getSourceFields() {
+		return sourceFields;
+	}
+
 	public void setSourceFields(String[] s) {
 		this.sourceFields = s;
+	}
+
+	@PropertyDescription("JSONPath result field list")
+	public String[] getTargetFields() {
+		return targetFields;
 	}
 
 	public void setTargetFields(String[] s) {
 		this.targetFields = s;
 	}
 
-	public RunJSONPath() {
+	@PropertyDescription("Return null for missing leaf nodes")
+	public boolean getNullMissingLeaf() { return this.nullMissingLeaf; }
+	public void setNullMissingLeaf(boolean b) { this.nullMissingLeaf = b; }
 
+	@PropertyDescription("Exclude JSON source fields from output")
+	public boolean getExcludeJSONFields() { return this.excludeJSONFields; }
+	public void setExcludeJSONFields(boolean b) {this.excludeJSONFields = b; }
+
+	public RunJSONPath() {
+        this.nullMissingLeaf = false;
+        this.excludeJSONFields = false;
 	}
 
 	@Override

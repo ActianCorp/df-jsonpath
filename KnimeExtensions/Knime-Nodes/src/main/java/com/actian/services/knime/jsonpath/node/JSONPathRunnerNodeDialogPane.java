@@ -55,7 +55,11 @@ import java.awt.*;
 	private ColumnModel<String> exprColumn;
 	private ColumnMajorTableModel tblModel;
 
-    @Override
+	private JCheckBox checkExcludeJSONSFields;
+	private JCheckBox checkNullMissingLeaf;
+
+
+	@Override
     public JSONPathRunnerNodeSettings getSettings() {
         return settings;
     }
@@ -150,6 +154,9 @@ import java.awt.*;
 		trgColumn.setValues(settings.targetFields.getStringArrayValue());
 		flatmapColumn.setValues(RunJSONPath.StringArray2BooleanArray(settings.flatmap.getStringArrayValue()));
 		exprColumn.setValues(settings.expressions.getStringArrayValue());
+
+		checkExcludeJSONSFields.setSelected(settings.excludeJSONFields.getBooleanValue());
+		checkNullMissingLeaf.setSelected(settings.nullMissingLeaf.getBooleanValue());
 	}
 
 	@Override
@@ -163,7 +170,9 @@ import java.awt.*;
 		settings.sourceFields.setStringArrayValue(srcColumn.getValues().toArray(new String[0]));
 		settings.targetFields.setStringArrayValue(trgColumn.getValues().toArray(new String[0]));
 		settings.flatmap.setStringArrayValue(RunJSONPath.BooleanArray2StringArray(flatmapColumn.getValues().toArray(new Boolean[0])));
-	}
+        settings.excludeJSONFields.setBooleanValue(checkExcludeJSONSFields.isSelected());
+        settings.nullMissingLeaf.setBooleanValue(checkNullMissingLeaf.isSelected());
+    }
 	@Override
 	public Component getComponent() {
 		return this;
@@ -188,27 +197,35 @@ import java.awt.*;
 		tblExpressionMapping = new TableEditorPanel();
 		tblExpressionMapping.setBorder(new TitledBorder(null, "JSONPath Mappings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
+        checkExcludeJSONSFields = new JCheckBox("Exclude JSON Source Fields");
+        checkNullMissingLeaf = new JCheckBox("Return nulls for missing leaf nodes");
+
 		setMinimumSize(new java.awt.Dimension(768, 512));
 		setPreferredSize(new java.awt.Dimension(768, 512));
 
-		GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(
-				groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-						.addGroup(groupLayout.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-										.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addContainerGap())
-		);
-		groupLayout.setVerticalGroup(
-				groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-								.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-								.addContainerGap())
-		);
-		setLayout(groupLayout);
-	}
+        GroupLayout groupLayout = new GroupLayout(this);
+        groupLayout.setHorizontalGroup(
+            groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(checkExcludeJSONSFields)
+                        .addComponent(checkNullMissingLeaf))
+                    .addContainerGap())
+        );
+
+        groupLayout.setVerticalGroup(
+            groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(checkExcludeJSONSFields)
+                    .addComponent(checkNullMissingLeaf)
+                    .addContainerGap())
+        );
+        setLayout(groupLayout);
+    }
 
 	private TableEditorPanel tblExpressionMapping;
 
