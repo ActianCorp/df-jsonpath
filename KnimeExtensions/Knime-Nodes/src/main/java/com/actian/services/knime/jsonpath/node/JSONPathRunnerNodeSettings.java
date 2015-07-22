@@ -38,14 +38,14 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 	public final SettingsModelStringArray expressions = new SettingsModelStringArray("expressions", null);
 	public final SettingsModelStringArray flatmap = new SettingsModelStringArray("flatmap",null);
 
-	public final OptionalSettingsModelBoolean excludeJSONFields = new OptionalSettingsModelBoolean("excludeJSONFields",false);
+	public final OptionalSettingsModelBoolean excludeSourceFields = new OptionalSettingsModelBoolean("excludeSourceFields",false);
 	public final OptionalSettingsModelBoolean nullMissingLeaf = new OptionalSettingsModelBoolean("nullMissingLeaf",false);
 
 
 	@Override
     protected List<SettingsModel> getComponentSettings() {
         return Arrays.<SettingsModel>
-        asList(sourceFields, targetFields, flatmap, expressions, excludeJSONFields, nullMissingLeaf);
+        asList(sourceFields, targetFields, flatmap, expressions, excludeSourceFields, nullMissingLeaf);
     }
 
     @Override
@@ -94,7 +94,7 @@ final class JSONPathRunnerNodeSettings extends AbstractDRSettingsModel<RunJSONPa
 		operator.setExpressions(this.expressions.getStringArrayValue());
 		operator.setFlatMap(flatmap.getStringArrayValue());
 
-        operator.setExcludeJSONFields(this.excludeJSONFields.getBooleanValue());
+        operator.setExcludeSourceFields(this.excludeSourceFields.getBooleanValue());
         operator.setNullMissingLeaf(this.nullMissingLeaf.getBooleanValue());
 	}
 }

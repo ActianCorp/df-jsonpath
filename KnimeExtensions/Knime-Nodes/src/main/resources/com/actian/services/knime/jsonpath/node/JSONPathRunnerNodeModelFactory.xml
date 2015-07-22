@@ -52,15 +52,21 @@
         <option name="Remove All">Deletes all defined field derivation.</option>
         <option name="Move Up">Move the currently selected field derivation up.</option>
         <option name="Move Down">Move the currently selected field derivation down.</option>
+        <option name="Exclude source fields">Selecting this option prevents the source fields from being included
+            in the output schema.</option>
+        <option name="Return nulls for missing leaf nodes">Selecting this option will allows null values to be used in
+            cases where there are missing leaf nodes in the source JSON object.  When not selected missing
+            leaf nodes cause JSONPath expression exceptions which force the output to go to the reject port.
+         </option>
     </fullDescription>
 
     <ports>
         <inPort index="0" name="Source records">Source records</inPort>
         <outPort index="0" name="Output records">Output records.   The schema used for the output port is a combination of
-            the input schema and the list of output (text) fields from the JSONPath mappings.
+            the input schema (if not excluded) and the list of output text fields from the JSONPath mappings.
         </outPort>
-        <outPort index="1" name="Rejected records">Records with JSON parse errors.  The schema for the reject record
-            port is a combination of the source record schema and an error text field.
+        <outPort index="1" name="Rejected records">Records with JSON parse errors and JSONPath expression errors.  The
+            schema for the reject record port is a combination of the source record schema and an error text field.
         </outPort>
     </ports>
 
