@@ -1,4 +1,4 @@
-package com.actian.services.dataflow.jsonpath.runner;
+package com.actian.services.dataflow.operators;
 
 /*
 		Copyright 2015 Actian Corporation
@@ -24,26 +24,29 @@ import static com.pervasive.datarush.types.TypeUtil.mergeTypes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
 
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import com.jayway.jsonpath.Option;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.pervasive.datarush.annotations.PortDescription;
+import com.pervasive.datarush.annotations.PropertyDescription;
+
 import net.minidev.json.parser.JSONParser;
 
-import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonSmartJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JsonSmartMappingProvider;
-import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
-import com.jayway.jsonpath.Option;
 
-import com.jayway.jsonpath.JsonPathException;
-import com.pervasive.datarush.DRException;
 import com.pervasive.datarush.graphs.LogicalGraph;
 import com.pervasive.datarush.graphs.LogicalGraphFactory;
 
@@ -54,25 +57,12 @@ import com.pervasive.datarush.ports.physical.*;
 import com.pervasive.datarush.ports.record.*;
 import com.pervasive.datarush.tokens.TokenUtils;
 import com.pervasive.datarush.tokens.scalar.*;
-import com.pervasive.datarush.types.Field;
 import com.pervasive.datarush.types.RecordTokenType;
 import com.pervasive.datarush.types.RecordTokenTypeBuilder;
-import com.pervasive.datarush.types.ScalarTokenType;
 import org.apache.commons.lang.BooleanUtils;
 
+@JsonSerialize(include=Inclusion.NON_DEFAULT)
 public class RunJSONPath extends ExecutableOperator implements RecordPipelineOperator {
-
-	public static final Configuration GSON_CONFIGURATION = Configuration
-			.builder()
-			.mappingProvider(new GsonMappingProvider())
-			.jsonProvider(new GsonJsonProvider())
-			.build();
-
-	public static final Configuration JSON_SMART_CONFIGURATION = Configuration
-			.builder()
-			.mappingProvider(new JsonSmartMappingProvider())
-			.jsonProvider(new JsonSmartJsonProvider(JSONParser.MODE_PERMISSIVE ^ JSONParser.USE_HI_PRECISION_FLOAT))
-			.build();
 
 	private final RecordPort input = newRecordInput("input");
 	private final RecordPort output = newRecordOutput("output");
@@ -82,39 +72,37 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 	private String[] sourceFields = null;
 	private String[] targetFields = null;
 	private String[] flatmapStrings = null;
+	private boolean excludeSourceFields = false;
+	private boolean nullMissingLeaf = false;
 
 	private Boolean[] flatmap;
-	
+
+	@PortDescription("Source records")
 	public RecordPort getInput() {
 		return input;
 	}
-	
+
+	@PortDescription("Output records")
 	public RecordPort getOutput() {
 		return output;
 	}
 
+	@PortDescription("Rejected records")
 	public RecordPort getReject() {
 		return reject;
 	}
 
+	@PropertyDescription("JSONPath expression list")
 	public String[] getExpressions() {
 		return expressions;
 	}
-
-	public String[] getFlatMap() {
-		return flatmapStrings;
-	}
-
-	public String[] getSourceFields() {
-		return sourceFields;
-	}
-
-	public String[] getTargetFields() {
-		return targetFields;
-	}
-
 	public void setExpressions(String[] s) {
 		this.expressions = s;
+	}
+
+	@PropertyDescription("Flat Map indicator list")
+	public String[] getFlatMap() {
+		return flatmapStrings;
 	}
 
 	public void setFlatMap(String[] s) {
@@ -122,16 +110,35 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		flatmap = StringArray2BooleanArray(s);
 	}
 
+	@PropertyDescription("JSON source field list")
+	public String[] getSourceFields() {
+		return sourceFields;
+	}
+
 	public void setSourceFields(String[] s) {
 		this.sourceFields = s;
+	}
+
+	@PropertyDescription("JSONPath result field list")
+	public String[] getTargetFields() {
+		return targetFields;
 	}
 
 	public void setTargetFields(String[] s) {
 		this.targetFields = s;
 	}
 
-	public RunJSONPath() {
+	@PropertyDescription("Return null for missing leaf nodes")
+	public boolean getNullMissingLeaf() { return this.nullMissingLeaf; }
+	public void setNullMissingLeaf(boolean b) { this.nullMissingLeaf = b; }
 
+	@PropertyDescription("Exclude JSON source fields from output")
+	public boolean getExcludeSourceFields() { return this.excludeSourceFields; }
+	public void setExcludeSourceFields(boolean b) {this.excludeSourceFields = b; }
+
+	public RunJSONPath() {
+        this.nullMissingLeaf = false;
+        this.excludeSourceFields = false;
 	}
 
 	@Override
@@ -155,12 +162,13 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		//required: declare output type
 		//  in this case our output type is the input type plus an additional field
 		//  containing the result
-		RecordTokenType outputType = mergeTypes(getInput().getType(context), typeBuilder.toType());
-		// RecordTokenType outputType = record(STRING("stResult"));
-		getOutput().setType(context, outputType);
-
+        if (excludeSourceFields) {
+            getOutput().setType(context, typeBuilder.toType());
+        } else {
+            RecordTokenType outputType = mergeTypes(getInput().getType(context), typeBuilder.toType());
+            getOutput().setType(context, outputType);
+        }
 		RecordTokenType rejectType = mergeTypes(getInput().getType(context), record(STRING("jsonPathErrorText")));
-		// RecordTokenType outputType = record(STRING("stResult"));
 		getReject().setType(context, rejectType);
 
 		//best practice: define output ordering/distribution
@@ -231,9 +239,17 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 
 	@Override
 	protected void execute(ExecutionContext context) {
-		// Configuration configuration = Configuration.defaultConfiguration();
-		// Configuration configuration = GSON_CONFIGURATION;
-		Configuration configuration = JSON_SMART_CONFIGURATION;
+
+		Configuration configuration = Configuration
+			.builder()
+			.mappingProvider(new JsonSmartMappingProvider())
+			.jsonProvider(new JsonSmartJsonProvider(JSONParser.MODE_PERMISSIVE ^ JSONParser.USE_HI_PRECISION_FLOAT))
+			.build();
+
+
+		if(nullMissingLeaf){
+			configuration = configuration.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+		}
 
 
 		RecordInput recordInput = getInput().getInput(context);
@@ -253,6 +269,11 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 		}
 
 		int flatcnt = 0;
+
+        int resultOffset = 0;
+
+        if (!excludeSourceFields)
+            resultOffset = allInputs.length;
 
 		// Count the number of output fields being flat mapped
 		for (Boolean f : flatmap) {
@@ -334,14 +355,16 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 				// No flattening to do.
 
 				// Copy the original input record fields to the corresponding output record fields
-				TokenUtils.transfer(allInputs, outputs);
+				if (!excludeSourceFields) {
+                    TokenUtils.transfer(allInputs, outputs);
+                }
 
 				for (int i = 0; i < targetFields.length; i++){
 
 					// The output record was generated by merging the input record with a list of new fields
 					// and new fields might have slightly different names if there were any name conflicts.
 					// We need to compute the offset of the current output field rather than look it up by name.
-					StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
+					StringSettable resultField = (StringSettable) recordOutput.getField(i + resultOffset);
 
 					resultField.set(formatResult(configuration, results.get(i)));
 				}
@@ -352,14 +375,16 @@ public class RunJSONPath extends ExecutableOperator implements RecordPipelineOpe
 				for (int f = 0; f < largestListSize; f++) {
 
 					// Copy the original input record fields to the corresponding output record fields
-					TokenUtils.transfer(allInputs, outputs);
+					if (!excludeSourceFields) {
+                        TokenUtils.transfer(allInputs, outputs);
+                    }
 
 					for (int i = 0; i < targetFields.length; i++){
 
 						// The output record was generated by merging the input record with a list of new fields
 						// and new fields might have slightly different names if there were any name conflicts.
 						// We need to compute the offset of the current output field rather than look it up by name.
-						StringSettable resultField = (StringSettable) recordOutput.getField(i + allInputs.length);
+						StringSettable resultField = (StringSettable) recordOutput.getField(i + resultOffset);
 
 						Object o = results.get(i);
 

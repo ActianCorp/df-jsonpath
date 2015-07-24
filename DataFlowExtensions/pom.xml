@@ -66,6 +66,12 @@
             <version>2.6</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -84,7 +90,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.actian.services.dataflow.jsonpath.runner.RunJSONPath</mainClass>
+                            <mainClass>com.actian.services.dataflow.operators.RunJSONPath</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

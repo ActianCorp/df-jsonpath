@@ -17,26 +17,22 @@ package com.actian.services.knime.jsonpath.node;
 */
 
 
-import java.awt.Component;
+import com.actian.services.dataflow.operators.RunJSONPath;
+import com.pervasive.datarush.knime.coreui.common.*;
+import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
+import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
+import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
+import com.pervasive.datarush.ports.PortMetadata;
+import com.pervasive.datarush.ports.record.RecordMetadata;
+import com.pervasive.datarush.types.RecordTokenType;
+import com.pervasive.datarush.types.TokenTypeConstant;
+import org.knime.core.node.InvalidSettingsException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-
-import com.pervasive.datarush.knime.coreui.common.*;
-import org.knime.core.node.InvalidSettingsException;
-
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.ColumnModel;
-import com.pervasive.datarush.knime.coreui.common.ColumnMajorTableModel.DefaultGenerator;
-import com.pervasive.datarush.knime.coreui.common.TableEditorPanel.CopyHandler;
-
-import com.pervasive.datarush.ports.PortMetadata;
-import com.pervasive.datarush.ports.record.RecordMetadata;
-import com.pervasive.datarush.types.RecordTokenType;
-import com.pervasive.datarush.types.TokenTypeConstant;
-
-import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
+import java.awt.*;
 
 
 /*package*/ final class JSONPathRunnerNodeDialogPane extends JPanel implements CustomDialogComponent<RunJSONPath>, TableModelListener {
@@ -59,7 +55,11 @@ import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
 	private ColumnModel<String> exprColumn;
 	private ColumnMajorTableModel tblModel;
 
-    @Override
+	private JCheckBox checkExcludeSourceFields;
+	private JCheckBox checkNullMissingLeaf;
+
+
+	@Override
     public JSONPathRunnerNodeSettings getSettings() {
         return settings;
     }
@@ -107,7 +107,7 @@ import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
 	private class EntryGenerator implements DefaultGenerator {
 		@Override
 		public Object[] getDefaultRow(ColumnMajorTableModel model) {
-			return new Object[] { "", "jsonpath" + model.getRowCount(), false, "$..*"};
+			return new Object[] { "", "json_field" + model.getRowCount(), false, "$..*"};
 		}
 	}
 
@@ -154,6 +154,9 @@ import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
 		trgColumn.setValues(settings.targetFields.getStringArrayValue());
 		flatmapColumn.setValues(RunJSONPath.StringArray2BooleanArray(settings.flatmap.getStringArrayValue()));
 		exprColumn.setValues(settings.expressions.getStringArrayValue());
+
+		checkExcludeSourceFields.setSelected(settings.excludeSourceFields.getBooleanValue());
+		checkNullMissingLeaf.setSelected(settings.nullMissingLeaf.getBooleanValue());
 	}
 
 	@Override
@@ -167,7 +170,9 @@ import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
 		settings.sourceFields.setStringArrayValue(srcColumn.getValues().toArray(new String[0]));
 		settings.targetFields.setStringArrayValue(trgColumn.getValues().toArray(new String[0]));
 		settings.flatmap.setStringArrayValue(RunJSONPath.BooleanArray2StringArray(flatmapColumn.getValues().toArray(new Boolean[0])));
-	}
+        settings.excludeSourceFields.setBooleanValue(checkExcludeSourceFields.isSelected());
+        settings.nullMissingLeaf.setBooleanValue(checkNullMissingLeaf.isSelected());
+    }
 	@Override
 	public Component getComponent() {
 		return this;
@@ -192,27 +197,35 @@ import com.actian.services.dataflow.jsonpath.runner.RunJSONPath;
 		tblExpressionMapping = new TableEditorPanel();
 		tblExpressionMapping.setBorder(new TitledBorder(null, "JSONPath Mappings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
+        checkExcludeSourceFields = new JCheckBox("Exclude source fields from output");
+        checkNullMissingLeaf = new JCheckBox("Return nulls for missing leaf nodes");
+
 		setMinimumSize(new java.awt.Dimension(768, 512));
 		setPreferredSize(new java.awt.Dimension(768, 512));
 
-		GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(
-				groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-						.addGroup(groupLayout.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-										.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addContainerGap())
-		);
-		groupLayout.setVerticalGroup(
-				groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-								.addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-								.addContainerGap())
-		);
-		setLayout(groupLayout);
-	}
+        GroupLayout groupLayout = new GroupLayout(this);
+        groupLayout.setHorizontalGroup(
+            groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(checkExcludeSourceFields)
+                        .addComponent(checkNullMissingLeaf))
+                    .addContainerGap())
+        );
+
+        groupLayout.setVerticalGroup(
+            groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(groupLayout.createSequentialGroup()
+                    .addComponent(tblExpressionMapping, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(checkExcludeSourceFields)
+                    .addComponent(checkNullMissingLeaf)
+                    .addContainerGap())
+        );
+        setLayout(groupLayout);
+    }
 
 	private TableEditorPanel tblExpressionMapping;
 

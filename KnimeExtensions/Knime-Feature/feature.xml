@@ -50,10 +50,17 @@
     </requires>
 
     <plugin
-            id="com.actian.services.knime.jsonpath.plugin"
+            id="com.actian.services.knime.jsonpath.nodes"
             download-size="0"
             install-size="0"
             version="0.0.0"
             unpack="true"/>
+
+    <plugin
+            id="com.actian.services.knime.jsonpath.functions"
+            download-size="0"
+            install-size="0"
+            version="0.0.0"/>
+
 
 </feature>
