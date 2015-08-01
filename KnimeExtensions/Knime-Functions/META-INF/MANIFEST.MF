@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Actian Services JSONPath Functions
 Bundle-SymbolicName: com.actian.services.knime.jsonpath.functions;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.4.qualifier
 Bundle-Vendor: Actian
 Fragment-Host: com.pervasive.datarush.core.runtime
 Require-Bundle: 

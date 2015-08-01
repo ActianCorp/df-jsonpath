@@ -17,7 +17,7 @@
 <feature
         id="com.actian.services.knime.jsonpath.feature"
         label="Actian JSONPath Component"
-        version="1.0.3.qualifier"
+        version="1.0.4.qualifier"
         provider-name="Actian Corporation">
 
     <description>This is the Actian JSONPath Component feature.</description>

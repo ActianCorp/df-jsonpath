@@ -4,7 +4,7 @@ The JSONPath Runner is an Actian DataFlow operator for running JSONPath expressi
 
 ## Configuration
 
-Before building df-jsonpath-runner you need to define the following environment variables to point to the local DataFlow update site [dataflow-p2-site](https://github.com/ActianCorp/dataflow-p2-site) root directory and the DataFlow version.
+Before building df-jsonpath you need to define the following environment variables to point to the local DataFlow update site [dataflow-p2-site](https://github.com/ActianCorp/dataflow-p2-site) root directory and the DataFlow version.
 
     export DATAFLOW_REPO_HOME=/Users/myuser/dataflow-p2-site
     export DATAFLOW_VER=6.5.2.112
