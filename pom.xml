@@ -22,7 +22,7 @@
     <groupId>com.actian.services.dataflow</groupId>
     <artifactId>jsonpath</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <modules>
         <module>DataFlowDependencies</module>

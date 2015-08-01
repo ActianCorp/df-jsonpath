@@ -20,12 +20,12 @@
     <parent>
         <groupId>com.actian.services.dataflow</groupId>
         <artifactId>com.actian.services.knime.jsonpath</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>com.actian.services.knime.jsonpath.functions</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <name>XPath - Knime - Functions</name>
-    <description>Seperate fragment to ensure functions are registered in KNIME</description>
+    <name>JSONPath - KNIME - Functions</name>
+    <description>Separate fragment to ensure functions are registered in KNIME</description>
 
     <build>
         <plugins>

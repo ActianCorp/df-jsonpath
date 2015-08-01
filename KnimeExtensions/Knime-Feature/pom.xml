@@ -24,7 +24,7 @@
     <parent>
         <groupId>com.actian.services.dataflow</groupId>
         <artifactId>com.actian.services.knime.jsonpath</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
